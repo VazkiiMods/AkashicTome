@@ -30,8 +30,7 @@ public class HUDHandler {
 		ScaledResolution res = event.getResolution();
 		
 		if(pos != null && pos.typeOfHit == RayTraceResult.Type.BLOCK) {
-			ItemStack tomeStack = mc.thePlayer.getHeldItemMainhand(); 
-			tomeStack = tomeStack.copy();
+			ItemStack tomeStack = mc.thePlayer.getHeldItemMainhand();
 			
 			boolean hasTome = tomeStack != null && tomeStack.getItem() == AkashicTome.tome;
 			if(!hasTome) {
@@ -41,6 +40,8 @@ public class HUDHandler {
 			
 			if(!hasTome)
 				return;
+			
+			tomeStack = tomeStack.copy();
 			
 			IBlockState state = mc.theWorld.getBlockState(pos.getBlockPos());
 			Block block = state.getBlock();

@@ -5,10 +5,12 @@ import java.net.URI;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import vazkii.akashictome.client.GuiTome;
 import vazkii.akashictome.client.HUDHandler;
 import vazkii.botania.api.wiki.IWikiProvider;
 import vazkii.botania.api.wiki.WikiHooks;
@@ -23,6 +25,11 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void initHUD() {
 		MinecraftForge.EVENT_BUS.register(new HUDHandler());
+	}
+	
+	@Override
+	public void openTomeGUI(ItemStack stack) {
+		Minecraft.getMinecraft().displayGuiScreen(new GuiTome(stack));
 	}
 	
 	@Override

@@ -6,6 +6,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -38,14 +39,20 @@ public class ItemTome extends ItemMod {
 				playerIn.setHeldItem(hand, newStack);
 				return EnumActionResult.SUCCESS;
 			}
-			
+
 			if(worldIn.isRemote) {
 				RayTraceResult result = new RayTraceResult(new Vec3d(hitX, hitY, hitZ), facing, pos);
 				return AkashicTome.proxy.openWikiPage(worldIn, worldIn.getBlockState(pos).getBlock(), result) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
 			}
 		}
-		
+
 		return EnumActionResult.PASS;
+	}
+
+	@Override
+	public ActionResult<ItemStack> onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand) {
+		AkashicTome.proxy.openTomeGUI(itemStackIn);
+		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemStackIn);
 	}
 
 	@Override

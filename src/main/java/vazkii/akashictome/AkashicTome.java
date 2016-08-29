@@ -1,5 +1,6 @@
 package vazkii.akashictome;
 
+import akka.io.Tcp.Message;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
@@ -10,7 +11,9 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
 import vazkii.akashictome.proxy.CommonProxy;
+import vazkii.arl.network.NetworkHandler;
 
 @Mod(modid = AkashicTome.MOD_ID, name = AkashicTome.MOD_NAME, version = AkashicTome.VERSION, dependencies = AkashicTome.DEPENDENCIES, guiFactory = AkashicTome.GUI_FACTORY)
 public class AkashicTome {
@@ -39,9 +42,11 @@ public class AkashicTome {
 //				'B', new ItemStack(Items.DYE, 1, EnumDyeColor.BLUE.getDyeDamage()),
 //				'R', new ItemStack(Items.DYE, 1, EnumDyeColor.RED.getDyeDamage()),
 //				'I', new ItemStack(Items.IRON_INGOT)); TODO
-
+		
 		MinecraftForge.EVENT_BUS.register(MorphingHandler.INSTANCE);
 		proxy.initHUD();
+		
+		NetworkHandler.register(MessageMorphTome.class, Side.SERVER);
 	}
 
 }

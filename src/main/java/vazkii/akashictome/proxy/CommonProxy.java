@@ -1,6 +1,7 @@
 package vazkii.akashictome.proxy;
 
 import net.minecraft.block.Block;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
@@ -11,6 +12,10 @@ public class CommonProxy {
 	}
 
 	public void initHUD() {
+		// NO-OP
+	}
+	
+	public void openTomeGUI(ItemStack stack) {
 		// NO-OP
 	}
 	
