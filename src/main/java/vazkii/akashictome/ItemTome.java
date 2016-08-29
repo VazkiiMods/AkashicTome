@@ -2,9 +2,6 @@ package vazkii.akashictome;
 
 import java.util.List;
 
-import net.minecraft.block.Block;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -12,8 +9,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.RecipeSorter;
@@ -40,8 +38,13 @@ public class ItemTome extends ItemMod {
 				playerIn.setHeldItem(hand, newStack);
 				return EnumActionResult.SUCCESS;
 			}
+			
+			if(worldIn.isRemote) {
+				RayTraceResult result = new RayTraceResult(new Vec3d(hitX, hitY, hitZ), facing, pos);
+				return AkashicTome.proxy.openWikiPage(worldIn, worldIn.getBlockState(pos).getBlock(), result) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
+			}
 		}
-
+		
 		return EnumActionResult.PASS;
 	}
 

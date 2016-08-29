@@ -115,6 +115,14 @@ public final class MorphingHandler {
 	public static String getModOrAlias(String mod) {
 		return ConfigHandler.aliases.containsKey(mod) ? ConfigHandler.aliases.get(mod) : mod;
 	}
+	
+	public static boolean doesStackHaveModAttached(ItemStack stack, String mod) {
+		if(!stack.hasTagCompound())
+			return false;
+		
+		NBTTagCompound morphData = stack.getTagCompound().getCompoundTag(TAG_TOME_DATA);
+		return morphData.hasKey(mod);
+	}
 
 	public static ItemStack getShiftStackForMod(ItemStack stack, String mod) {
 		if(!stack.hasTagCompound())

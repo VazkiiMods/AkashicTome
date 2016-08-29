@@ -41,6 +41,7 @@ public class AkashicTome {
 //				'I', new ItemStack(Items.IRON_INGOT)); TODO
 
 		MinecraftForge.EVENT_BUS.register(MorphingHandler.INSTANCE);
+		proxy.initHUD();
 	}
 
 }
