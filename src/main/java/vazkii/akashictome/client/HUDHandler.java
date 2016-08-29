@@ -1,4 +1,4 @@
-package vazkii.akashictome;
+package vazkii.akashictome.client;
 
 import org.lwjgl.opengl.GL11;
 
@@ -15,6 +15,8 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import vazkii.akashictome.AkashicTome;
+import vazkii.akashictome.MorphingHandler;
 import vazkii.arl.util.ItemNBTHelper;
 import vazkii.botania.api.wiki.IWikiProvider;
 import vazkii.botania.api.wiki.WikiHooks;

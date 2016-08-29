@@ -1,4 +1,4 @@
-package vazkii.akashictome;
+package vazkii.akashictome.client;
 
 import java.util.Set;
 
@@ -8,6 +8,8 @@ import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.IModGuiFactory;
 import net.minecraftforge.fml.client.config.GuiConfig;
+import vazkii.akashictome.AkashicTome;
+import vazkii.akashictome.ConfigHandler;
 
 public class GuiFactory implements IModGuiFactory {
 

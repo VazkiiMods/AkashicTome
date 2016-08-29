@@ -9,7 +9,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import vazkii.akashictome.HUDHandler;
+import vazkii.akashictome.client.HUDHandler;
 import vazkii.botania.api.wiki.IWikiProvider;
 import vazkii.botania.api.wiki.WikiHooks;
 
