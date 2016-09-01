@@ -28,25 +28,11 @@ public class AkashicTome {
 	@SidedProxy(clientSide = "vazkii.akashictome.proxy.ClientProxy", serverSide = "vazkii.akashictome.proxy.CommonProxy")
 	public static CommonProxy proxy;
 
-	public static Item tome;
-
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		ConfigHandler.init(event.getSuggestedConfigurationFile());
-
-		tome = new ItemTome();
-
-//		GameRegistry.addShapedRecipe(new ItemStack(tome),
-//				" GB", " IR", "I  ",
-//				'G', new ItemStack(Items.DYE, 1, EnumDyeColor.GREEN.getDyeDamage()),
-//				'B', new ItemStack(Items.DYE, 1, EnumDyeColor.BLUE.getDyeDamage()),
-//				'R', new ItemStack(Items.DYE, 1, EnumDyeColor.RED.getDyeDamage()),
-//				'I', new ItemStack(Items.IRON_INGOT)); TODO
 		
-		MinecraftForge.EVENT_BUS.register(MorphingHandler.INSTANCE);
-		proxy.initHUD();
-		
-		NetworkHandler.register(MessageMorphTome.class, Side.SERVER);
+		proxy.preInit();
 	}
 
 }

@@ -5,19 +5,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
-import net.minecraft.world.World;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
@@ -36,7 +29,7 @@ public final class MorphingHandler {
 	@SubscribeEvent
 	public void onPlayerLeftClick(PlayerInteractEvent.LeftClickEmpty event) {
 		ItemStack stack = event.getItemStack();
-		if(stack != null && isAkashicTome(stack) && stack.getItem() != AkashicTome.tome) {
+		if(stack != null && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
 			ItemStack newStack = getShiftStackForMod(stack, MINECRAFT);
 			event.getEntityPlayer().inventory.setInventorySlotContents(event.getEntityPlayer().inventory.currentItem, newStack);
 			AkashicTome.proxy.updateEquippedItem();
@@ -72,7 +65,7 @@ public final class MorphingHandler {
 
 		EntityItem e = event.getEntityItem();
 		ItemStack stack = e.getEntityItem();
-		if(stack != null && isAkashicTome(stack) && stack.getItem() != AkashicTome.tome) {
+		if(stack != null && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
 			NBTTagCompound morphData = (NBTTagCompound) stack.getTagCompound().getCompoundTag(TAG_TOME_DATA).copy();
 
 			ItemStack morph = makeMorphedStack(stack, MINECRAFT, morphData);
@@ -150,14 +143,14 @@ public final class MorphingHandler {
 
 		ItemStack stack;
 		if(targetMod.equals(MINECRAFT))
-			stack = new ItemStack(AkashicTome.tome);
+			stack = new ItemStack(ModItems.tome);
 		else {
 			NBTTagCompound targetCmp = morphData.getCompoundTag(targetMod);
 			morphData.removeTag(targetMod);
 
 			stack = ItemStack.loadItemStackFromNBT(targetCmp);
 			if(stack == null)
-				stack = new ItemStack(AkashicTome.tome);
+				stack = new ItemStack(ModItems.tome);
 		}
 
 		if(!stack.hasTagCompound())
@@ -167,7 +160,7 @@ public final class MorphingHandler {
 		stackCmp.setTag(TAG_TOME_DATA, morphData);
 		stackCmp.setBoolean(TAG_MORPHING, true);
 
-		if(stack.getItem() != AkashicTome.tome) {
+		if(stack.getItem() != ModItems.tome) {
 			String displayName = stack.getDisplayName();
 			if(stackCmp.hasKey(TAG_TOME_DISPLAY_NAME))
 				displayName = stackCmp.getString(TAG_TOME_DISPLAY_NAME);
@@ -196,7 +189,7 @@ public final class MorphingHandler {
 		if(stack == null)
 			return false;
 
-		if(stack.getItem() == AkashicTome.tome)
+		if(stack.getItem() == ModItems.tome)
 			return true;
 
 		return stack.hasTagCompound() && stack.getTagCompound().getBoolean(TAG_MORPHING);

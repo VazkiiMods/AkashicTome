@@ -16,6 +16,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import vazkii.akashictome.AkashicTome;
+import vazkii.akashictome.ModItems;
 import vazkii.akashictome.MorphingHandler;
 import vazkii.arl.util.ItemNBTHelper;
 import vazkii.botania.api.wiki.IWikiProvider;
@@ -32,10 +33,10 @@ public class HUDHandler {
 		if(pos != null && pos.typeOfHit == RayTraceResult.Type.BLOCK) {
 			ItemStack tomeStack = mc.thePlayer.getHeldItemMainhand();
 			
-			boolean hasTome = tomeStack != null && tomeStack.getItem() == AkashicTome.tome;
+			boolean hasTome = tomeStack != null && tomeStack.getItem() == ModItems.tome;
 			if(!hasTome) {
 				tomeStack = mc.thePlayer.getHeldItemOffhand();
-				hasTome = tomeStack != null && tomeStack.getItem() == AkashicTome.tome;
+				hasTome = tomeStack != null && tomeStack.getItem() == ModItems.tome;
 			}
 			
 			if(!hasTome)
@@ -61,7 +62,7 @@ public class HUDHandler {
 					IWikiProvider provider = WikiHooks.getWikiFor(block);
 					String url = provider.getWikiURL(mc.theWorld, pos, mc.thePlayer);
 					if(url != null && !url.isEmpty()) {
-						drawStack = new ItemStack(AkashicTome.tome);
+						drawStack = new ItemStack(ModItems.tome);
 						line1 = provider.getBlockName(mc.theWorld, pos, mc.thePlayer);
 						line2 = "@ " + TextFormatting.AQUA + provider.getWikiName(mc.theWorld, pos, mc.thePlayer);
 					}
