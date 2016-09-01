@@ -5,13 +5,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import vazkii.akashictome.ConfigHandler;
 import vazkii.akashictome.ItemTome;
 import vazkii.akashictome.MessageMorphTome;
 import vazkii.akashictome.ModItems;
 import vazkii.akashictome.MorphingHandler;
+import vazkii.akashictome.WikiFallback;
 import vazkii.arl.network.NetworkHandler;
+import vazkii.botania.api.wiki.WikiHooks;
 
 public class CommonProxy {
 
@@ -29,6 +32,9 @@ public class CommonProxy {
 		initHUD();
 		
 		NetworkHandler.register(MessageMorphTome.class, Side.SERVER);
+		
+		if(!Loader.isModLoaded("Botania"))
+			WikiFallback.doWikiRegister();
 	}
 	
 	public void updateEquippedItem() {

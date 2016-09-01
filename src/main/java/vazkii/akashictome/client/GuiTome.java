@@ -38,20 +38,20 @@ public class GuiTome extends GuiScreen {
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		
-		if(!tome.hasTagCompound())
-			return;
-		
-		NBTTagCompound data = tome.getTagCompound().getCompoundTag(MorphingHandler.TAG_TOME_DATA);
 		List<ItemStack> stacks = new ArrayList();
-		
-		for(String s : data.getKeySet()) {
-			NBTTagCompound cmp = data.getCompoundTag(s);
-			if(cmp != null) {
-				ItemStack modStack = ItemStack.loadItemStackFromNBT(cmp);
-				stacks.add(modStack);
+
+		if(tome.hasTagCompound()) {
+			NBTTagCompound data = tome.getTagCompound().getCompoundTag(MorphingHandler.TAG_TOME_DATA);
+			
+			for(String s : data.getKeySet()) {
+				NBTTagCompound cmp = data.getCompoundTag(s);
+				if(cmp != null) {
+					ItemStack modStack = ItemStack.loadItemStackFromNBT(cmp);
+					stacks.add(modStack);
+				}
 			}
 		}
-		
+
 		ScaledResolution res = new ScaledResolution(mc);
 		int centerX = res.getScaledWidth() / 2;
 		int centerY = res.getScaledHeight() / 2;
@@ -68,20 +68,22 @@ public class GuiTome extends GuiScreen {
 		
 		ItemStack tooltipStack = null;
 		
-		RenderHelper.enableGUIStandardItemLighting();
-		for(int i = 0; i < stacks.size(); i++) {
-			int x = startX + (i % amountPerRow) * iconSize;
-			int y = startY + (i / amountPerRow) * iconSize;
-			ItemStack stack = stacks.get(i);
-			
-			if(mouseX > x && mouseY > y && mouseX <= (x + 16) && mouseY <= (y + 16)) {
-				tooltipStack = stack;
-				y -= 2;
+		if(!stacks.isEmpty()) {
+			RenderHelper.enableGUIStandardItemLighting();
+			for(int i = 0; i < stacks.size(); i++) {
+				int x = startX + (i % amountPerRow) * iconSize;
+				int y = startY + (i / amountPerRow) * iconSize;
+				ItemStack stack = stacks.get(i);
+				
+				if(mouseX > x && mouseY > y && mouseX <= (x + 16) && mouseY <= (y + 16)) {
+					tooltipStack = stack;
+					y -= 2;
+				}
+				
+				itemRender.renderItemAndEffectIntoGUI(stack, x, y);
 			}
-			
-			itemRender.renderItemAndEffectIntoGUI(stack, x, y);
+			RenderHelper.disableStandardItemLighting();
 		}
-		RenderHelper.disableStandardItemLighting();
 		
 		GL11.glPushMatrix();
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
@@ -98,6 +100,7 @@ public class GuiTome extends GuiScreen {
 		GL11.glRotatef(-100F, 1, 0F, 0F);
 		GL11.glRotatef(4F * 90F - 90F, 0F, 1F, 0F);
 		GL11.glRotatef(180F, 1F, 0F, 0F);
+		GL11.glColor4f(1F, 1F, 1F, 1F);
 		mc.renderEngine.bindTexture(texture);
 		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 		modelBook.render(null, 0F, 0F, 0F, 1F, 0F, 1.2F);
