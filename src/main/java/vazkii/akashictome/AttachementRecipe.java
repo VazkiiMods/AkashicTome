@@ -7,6 +7,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
+import vazkii.arl.util.ItemNBTHelper;
 
 public class AttachementRecipe implements IRecipe {
 
@@ -59,10 +60,15 @@ public class AttachementRecipe implements IRecipe {
 
 		NBTTagCompound morphData = cmp.getCompoundTag(MorphingHandler.TAG_TOME_DATA);
 		String mod = MorphingHandler.getModFromStack(target);
+		String modClean = mod;
+		int iter = 1;
+		
+		while(morphData.hasKey(mod)) {
+			mod = modClean + iter;
+			iter++;
+		}
 
-		if(morphData.hasKey(mod))
-			return null;
-
+		ItemNBTHelper.setString(target, MorphingHandler.TAG_ITEM_DEFINED_MOD, mod);
 		NBTTagCompound modCmp = new NBTTagCompound();
 		target.writeToNBT(modCmp);
 		morphData.setTag(mod, modCmp);

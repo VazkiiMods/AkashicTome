@@ -15,6 +15,9 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import vazkii.akashictome.network.message.MessageUnmorphTome;
+import vazkii.arl.network.NetworkHandler;
+import vazkii.arl.util.ItemNBTHelper;
 
 public final class MorphingHandler {
 
@@ -25,38 +28,15 @@ public final class MorphingHandler {
 	public static final String TAG_MORPHING = "akashictome:is_morphing";
 	public static final String TAG_TOME_DATA = "akashictome:data";
 	public static final String TAG_TOME_DISPLAY_NAME = "akashictome:displayName";
+	public static final String TAG_ITEM_DEFINED_MOD = "akashictome:definedMod";
 
 	@SubscribeEvent
 	public void onPlayerLeftClick(PlayerInteractEvent.LeftClickEmpty event) {
 		ItemStack stack = event.getItemStack();
 		if(stack != null && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
-			ItemStack newStack = getShiftStackForMod(stack, MINECRAFT);
-			event.getEntityPlayer().inventory.setInventorySlotContents(event.getEntityPlayer().inventory.currentItem, newStack);
-			AkashicTome.proxy.updateEquippedItem();
+			NetworkHandler.INSTANCE.sendToServer(new MessageUnmorphTome());
 		}
 	}
-	
-//	@SubscribeEvent
-//	public void onPlayerTick(LivingUpdateEvent event) {
-//		if(event.getEntity() instanceof EntityPlayer) {
-//			EntityPlayer player = (EntityPlayer) event.getEntity();
-//			ItemStack mainHandItem = player.getHeldItem(ConfigHandler.invertHandShift ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND);
-//
-//			if(isMorphTool(mainHandItem)) {
-//				RayTraceResult res = raycast(player, 4.5);
-//				if(res != null) {
-//					IBlockState state = player.worldObj.getBlockState(res.getBlockPos());
-//					String mod = getModFromState(state);
-//
-//					ItemStack newStack = getShiftStackForMod(mainHandItem, mod);
-//					if(newStack != mainHandItem && !ItemStack.areItemsEqual(newStack, mainHandItem)) {
-//						player.inventory.setInventorySlotContents(ConfigHandler.invertHandShift ? player.inventory.getSizeInventory() - 1 : player.inventory.currentItem, newStack);
-//						AkashicTome.proxy.updateEquippedItem();
-//					}
-//				}
-//			}
-//		}
-//	}
 
 	@SubscribeEvent
 	public void onItemDropped(ItemTossEvent event) {
@@ -130,7 +110,7 @@ public final class MorphingHandler {
 	}
 
 	public static ItemStack makeMorphedStack(ItemStack currentStack, String targetMod, NBTTagCompound morphData) {
-		String currentMod = getModFromStack(currentStack);
+		String currentMod = ItemNBTHelper.getString(currentStack, TAG_ITEM_DEFINED_MOD, getModFromStack(currentStack));
 
 		NBTTagCompound currentCmp = new NBTTagCompound();
 		currentStack.writeToNBT(currentCmp);

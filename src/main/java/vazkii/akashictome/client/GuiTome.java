@@ -1,6 +1,7 @@
 package vazkii.akashictome.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.lwjgl.input.Mouse;
@@ -8,7 +9,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.glu.GLU;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.model.ModelBook;
@@ -18,8 +18,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import scala.actors.threadpool.Arrays;
-import vazkii.akashictome.MessageMorphTome;
 import vazkii.akashictome.MorphingHandler;
+import vazkii.akashictome.network.message.MessageMorphTome;
 import vazkii.arl.network.NetworkHandler;
 import vazkii.arl.util.ItemNBTHelper;
 
@@ -42,8 +42,10 @@ public class GuiTome extends GuiScreen {
 
 		if(tome.hasTagCompound()) {
 			NBTTagCompound data = tome.getTagCompound().getCompoundTag(MorphingHandler.TAG_TOME_DATA);
+			List<String> keys = new ArrayList(data.getKeySet());
+			Collections.sort(keys);
 			
-			for(String s : data.getKeySet()) {
+			for(String s : keys) {
 				NBTTagCompound cmp = data.getCompoundTag(s);
 				if(cmp != null) {
 					ItemStack modStack = ItemStack.loadItemStackFromNBT(cmp);
@@ -64,8 +66,10 @@ public class GuiTome extends GuiScreen {
 		int startY = centerY - (rows * iconSize) + 45;
 		
 		int padding = 4;
-		drawRect(startX - padding, startY - padding, startX + iconSize * amountPerRow + padding, startY + iconSize * rows + padding, 0x44000000);
-		
+		int extra = 2;
+		drawRect(startX - padding, startY - padding, startX + iconSize * amountPerRow + padding, startY + iconSize * rows + padding, 0x22000000);
+		drawRect(startX - padding - extra, startY - padding - extra, startX + iconSize * amountPerRow + padding + extra, startY + iconSize * rows + padding + extra, 0x22000000);
+
 		ItemStack tooltipStack = null;
 		
 		if(!stacks.isEmpty()) {
@@ -116,11 +120,13 @@ public class GuiTome extends GuiScreen {
 		
 		if(tooltipStack != null) {
 			String name = ItemNBTHelper.getString(tooltipStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, tooltipStack.getDisplayName());
-			String mod = TextFormatting.GRAY + MorphingHandler.getModNameForId(MorphingHandler.getModFromStack(tooltipStack));
+			String definedMod = MorphingHandler.getModFromStack(tooltipStack);
+			String mod = TextFormatting.GRAY + MorphingHandler.getModNameForId(definedMod);
+			definedMod = ItemNBTHelper.getString(tooltipStack, MorphingHandler.TAG_ITEM_DEFINED_MOD, definedMod);
 			vazkii.arl.util.RenderHelper.renderTooltip(mouseX, mouseY, Arrays.asList(new String[] { name, mod }));
 			
 			if(Mouse.isButtonDown(0)) {
-				NetworkHandler.INSTANCE.sendToServer(new MessageMorphTome(mod));
+				NetworkHandler.INSTANCE.sendToServer(new MessageMorphTome(definedMod));
 				mc.displayGuiScreen(null);
 			}
 		}

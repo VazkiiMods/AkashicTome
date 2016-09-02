@@ -9,10 +9,11 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import vazkii.akashictome.ConfigHandler;
 import vazkii.akashictome.ItemTome;
-import vazkii.akashictome.MessageMorphTome;
 import vazkii.akashictome.ModItems;
 import vazkii.akashictome.MorphingHandler;
 import vazkii.akashictome.WikiFallback;
+import vazkii.akashictome.network.MessageRegister;
+import vazkii.akashictome.network.message.MessageMorphTome;
 import vazkii.arl.network.NetworkHandler;
 import vazkii.botania.api.wiki.WikiHooks;
 
@@ -31,7 +32,7 @@ public class CommonProxy {
 		MinecraftForge.EVENT_BUS.register(MorphingHandler.INSTANCE);
 		initHUD();
 		
-		NetworkHandler.register(MessageMorphTome.class, Side.SERVER);
+		MessageRegister.init();
 		
 		if(!Loader.isModLoaded("Botania"))
 			WikiFallback.doWikiRegister();

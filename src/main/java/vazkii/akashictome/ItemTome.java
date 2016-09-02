@@ -1,5 +1,7 @@
 package vazkii.akashictome;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.creativetab.CreativeTabs;
@@ -13,6 +15,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.RecipeSorter;
@@ -65,7 +68,11 @@ public class ItemTome extends ItemMod {
 			return;
 
 		tooltipIfShift(tooltip, () -> {
-			for(String s : data.getKeySet()) {
+			List<String> keys = new ArrayList(data.getKeySet());
+			Collections.sort(keys);
+			String currMod = "";
+			
+			for(String s : keys) {
 				NBTTagCompound cmp = data.getCompoundTag(s);
 				if(cmp != null) {
 					ItemStack modStack = ItemStack.loadItemStackFromNBT(cmp);
@@ -73,8 +80,13 @@ public class ItemTome extends ItemMod {
 						String name = modStack.getDisplayName();
 						if(modStack.hasTagCompound() && modStack.getTagCompound().hasKey(MorphingHandler.TAG_TOME_DISPLAY_NAME))
 							name = modStack.getTagCompound().getString(MorphingHandler.TAG_TOME_DISPLAY_NAME);
-
-						tooltip.add(" " + MorphingHandler.getModNameForId(s) + " : " + name);
+						String mod = MorphingHandler.getModFromStack(modStack);
+						
+						if(!currMod.equals(mod)) 
+							tooltip.add(TextFormatting.AQUA + MorphingHandler.getModNameForId(mod));
+						tooltip.add(" \u2520 " + name);
+						
+						currMod = mod;
 					}
 				}
 			}
