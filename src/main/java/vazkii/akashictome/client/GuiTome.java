@@ -1,6 +1,7 @@
 package vazkii.akashictome.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,7 +18,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
-import scala.actors.threadpool.Arrays;
 import vazkii.akashictome.MorphingHandler;
 import vazkii.akashictome.network.message.MessageMorphTome;
 import vazkii.arl.network.NetworkHandler;
