@@ -10,12 +10,11 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import vazkii.akashictome.AkashicTome;
 import vazkii.akashictome.ModItems;
 import vazkii.akashictome.MorphingHandler;
 import vazkii.arl.util.ItemNBTHelper;
@@ -26,6 +25,9 @@ public class HUDHandler {
 
 	@SubscribeEvent
 	public void onDrawScreen(RenderGameOverlayEvent.Post event) {
+		if(event.getType() != ElementType.ALL)
+			return;
+		
 		Minecraft mc = Minecraft.getMinecraft();
 		RayTraceResult pos = mc.objectMouseOver;
 		ScaledResolution res = event.getResolution();
