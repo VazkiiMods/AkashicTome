@@ -23,7 +23,7 @@ public class AkashicTome {
 	public static final String BUILD = "GRADLE:BUILD";
 	public static final String VERSION = "GRADLE:VERSION-" + BUILD;
 	public static final String DEPENDENCIES = "required-after:Forge@[12.17.0.1909,);required-before:AutoRegLib";
-	public static final String GUI_FACTORY = "vazkii.akashictome.GuiFactory";
+	public static final String GUI_FACTORY = "vazkii.akashictome.client.GuiFactory";
 
 	@SidedProxy(clientSide = "vazkii.akashictome.proxy.ClientProxy", serverSide = "vazkii.akashictome.proxy.CommonProxy")
 	public static CommonProxy proxy;
