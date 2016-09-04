@@ -25,7 +25,7 @@ import vazkii.arl.util.ItemNBTHelper;
 
 public class GuiTome extends GuiScreen {
 
-	ResourceLocation texture = new ResourceLocation("textures/entity/enchanting_table_book.png");
+	ResourceLocation texture = new ResourceLocation("akashictome:textures/models/book.png");
 	ModelBook modelBook = new ModelBook();
 	
 	ItemStack tome;
