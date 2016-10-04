@@ -77,7 +77,7 @@ public class AttachementRecipe implements IRecipe {
 	}
 
 	public boolean isTarget(ItemStack stack) {
-		if(stack == null || MorphingHandler.isAkashicTome(stack) || stack.getItem().hasContainerItem(stack))
+		if(stack == null || MorphingHandler.isAkashicTome(stack))
 			return false;
 
 		String mod = MorphingHandler.getModFromStack(stack);
@@ -114,7 +114,7 @@ public class AttachementRecipe implements IRecipe {
 
 	@Override
 	public ItemStack[] getRemainingItems(InventoryCrafting inv) {
-		return ForgeHooks.defaultRecipeGetRemainingItems(inv);
+		return new ItemStack[inv.getSizeInventory()];
 	}
 
 }
