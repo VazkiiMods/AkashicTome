@@ -90,11 +90,12 @@ public class AttachementRecipe implements IRecipe {
 		if(ConfigHandler.blacklistedMods.contains(mod))
 			return false;
 
-		ResourceLocation registryName = stack.getItem().getRegistryName();
-		if(ConfigHandler.whitelistedItems.contains(registryName.toString()))
+		ResourceLocation registryNameRL = stack.getItem().getRegistryName();
+		String registryName = registryNameRL.toString();
+		if(ConfigHandler.whitelistedItems.contains(registryName) || ConfigHandler.whitelistedItems.contains(registryName + ":" + stack.getItemDamage()))
 			return true;
 
-		String itemName = registryName.getResourcePath().toLowerCase();
+		String itemName = registryNameRL.getResourcePath().toLowerCase();
 		for(String s : ConfigHandler.whitelistedNames)
 			if(itemName.contains(s.toLowerCase()))
 				return true;

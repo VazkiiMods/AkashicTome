@@ -33,8 +33,8 @@ public class ConfigHandler {
 	public static void load() {
 		allItems = loadPropBool("Allow all items to be added", false);
 		
-		whitelistedItems = loadPropStringList("Whitelisted Items");
-		whitelistedNames = loadPropStringList("Whitelisted Names", "book", "tome", "lexicon", "nomicon", "tablet", "manual", "knowledge", "pedia", "compendium", "guide");
+		whitelistedItems = loadPropStringList("Whitelisted Items", "roots:runedTablet", "opencomputers:tool:4", "immersiveengineering:tool:3");
+		whitelistedNames = loadPropStringList("Whitelisted Names", "book", "tome", "lexicon", "nomicon", "manual", "knowledge", "pedia", "compendium", "guide");
 		blacklistedMods = loadPropStringList("Blacklisted Mods");
 
 		aliases.clear();
