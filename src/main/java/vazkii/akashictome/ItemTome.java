@@ -54,7 +54,7 @@ public class ItemTome extends ItemMod {
 
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand) {
-		AkashicTome.proxy.openTomeGUI(itemStackIn);
+		AkashicTome.proxy.openTomeGUI(playerIn, itemStackIn);
 		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemStackIn);
 	}
 

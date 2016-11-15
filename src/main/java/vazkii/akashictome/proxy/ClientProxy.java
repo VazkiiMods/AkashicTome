@@ -5,6 +5,7 @@ import java.net.URI;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.RayTraceResult;
@@ -28,8 +29,10 @@ public class ClientProxy extends CommonProxy {
 	}
 	
 	@Override
-	public void openTomeGUI(ItemStack stack) {
-		Minecraft.getMinecraft().displayGuiScreen(new GuiTome(stack));
+	public void openTomeGUI(EntityPlayer player, ItemStack stack) {
+		Minecraft mc = Minecraft.getMinecraft();
+		if(mc.thePlayer == player)
+			mc.displayGuiScreen(new GuiTome(stack));
 	}
 	
 	@Override

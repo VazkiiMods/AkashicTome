@@ -1,9 +1,9 @@
 package vazkii.akashictome.proxy;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
@@ -39,7 +39,7 @@ public class CommonProxy {
 		// NO-OP
 	}
 	
-	public void openTomeGUI(ItemStack stack) {
+	public void openTomeGUI(EntityPlayer player, ItemStack stack) {
 		// NO-OP
 	}
 	
