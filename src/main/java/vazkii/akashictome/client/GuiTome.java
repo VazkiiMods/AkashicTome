@@ -48,7 +48,7 @@ public class GuiTome extends GuiScreen {
 			for(String s : keys) {
 				NBTTagCompound cmp = data.getCompoundTag(s);
 				if(cmp != null) {
-					ItemStack modStack = ItemStack.loadItemStackFromNBT(cmp);
+					ItemStack modStack = new ItemStack(cmp);
 					stacks.add(modStack);
 				}
 			}
@@ -70,7 +70,7 @@ public class GuiTome extends GuiScreen {
 		drawRect(startX - padding, startY - padding, startX + iconSize * amountPerRow + padding, startY + iconSize * rows + padding, 0x22000000);
 		drawRect(startX - padding - extra, startY - padding - extra, startX + iconSize * amountPerRow + padding + extra, startY + iconSize * rows + padding + extra, 0x22000000);
 
-		ItemStack tooltipStack = null;
+		ItemStack tooltipStack = ItemStack.EMPTY;
 		
 		if(!stacks.isEmpty()) {
 			RenderHelper.enableGUIStandardItemLighting();
@@ -118,7 +118,7 @@ public class GuiTome extends GuiScreen {
 		RenderHelper.disableStandardItemLighting();
 		GL11.glColor4f(1F, 1F, 1F, 1F);
 		
-		if(tooltipStack != null) {
+		if(!tooltipStack.isEmpty()) {
 			String name = ItemNBTHelper.getString(tooltipStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, tooltipStack.getDisplayName());
 			String definedMod = MorphingHandler.getModFromStack(tooltipStack);
 			String mod = TextFormatting.GRAY + MorphingHandler.getModNameForId(definedMod);

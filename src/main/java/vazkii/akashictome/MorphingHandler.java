@@ -45,16 +45,16 @@ public final class MorphingHandler {
 
 		EntityItem e = event.getEntityItem();
 		ItemStack stack = e.getEntityItem();
-		if(stack != null && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
+		if(!stack.isEmpty() && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
 			NBTTagCompound morphData = (NBTTagCompound) stack.getTagCompound().getCompoundTag(TAG_TOME_DATA).copy();
 
 			ItemStack morph = makeMorphedStack(stack, MINECRAFT, morphData);
 			NBTTagCompound newMorphData = morph.getTagCompound().getCompoundTag(TAG_TOME_DATA);
 			newMorphData.removeTag(getModFromStack(stack));
 
-			if(!e.worldObj.isRemote) {
-				EntityItem newItem = new EntityItem(e.worldObj, e.posX, e.posY, e.posZ, morph);
-				e.worldObj.spawnEntityInWorld(newItem);
+			if(!e.getEntityWorld().isRemote) {
+				EntityItem newItem = new EntityItem(e.getEntityWorld(), e.posX, e.posY, e.posZ, morph);
+				e.getEntityWorld().spawnEntity(newItem);
 			}
 
 			ItemStack copy = stack.copy();
@@ -82,7 +82,7 @@ public final class MorphingHandler {
 	}
 
 	public static String getModFromStack(ItemStack stack) {
-		return getModOrAlias(stack == null ? MINECRAFT : stack.getItem().getRegistryName().getResourceDomain());
+		return getModOrAlias(stack.isEmpty() ? MINECRAFT : stack.getItem().getRegistryName().getResourceDomain());
 	}
 
 	public static String getModOrAlias(String mod) {
@@ -128,8 +128,8 @@ public final class MorphingHandler {
 			NBTTagCompound targetCmp = morphData.getCompoundTag(targetMod);
 			morphData.removeTag(targetMod);
 
-			stack = ItemStack.loadItemStackFromNBT(targetCmp);
-			if(stack == null)
+			stack = new ItemStack(targetCmp);
+			if(stack.isEmpty())
 				stack = new ItemStack(ModItems.tome);
 		}
 
@@ -149,7 +149,7 @@ public final class MorphingHandler {
 			stack.setStackDisplayName(TextFormatting.RESET + I18n.translateToLocalFormatted("akashictome.sudo_name", TextFormatting.GREEN + displayName + TextFormatting.RESET));
 		}
 
-		stack.stackSize = 1;
+		stack.setCount(1);
 		return stack;
 	}
 
@@ -166,7 +166,7 @@ public final class MorphingHandler {
 	}
 
 	public static boolean isAkashicTome(ItemStack stack) {
-		if(stack == null)
+		if(stack.isEmpty())
 			return false;
 
 		if(stack.getItem() == ModItems.tome)

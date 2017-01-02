@@ -34,7 +34,8 @@ public class ItemTome extends ItemMod {
 	}
 
 	@Override
-	public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+	public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		ItemStack stack = playerIn.getActiveItemStack();
 		if(playerIn.isSneaking()) {
 			String mod = MorphingHandler.getModFromState(worldIn.getBlockState(pos)); 
 			ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, mod);
@@ -53,9 +54,10 @@ public class ItemTome extends ItemMod {
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, EnumHand hand) {
-		AkashicTome.proxy.openTomeGUI(playerIn, itemStackIn);
-		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemStackIn);
+	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand hand) {
+		ItemStack stack = playerIn.getActiveItemStack();
+		AkashicTome.proxy.openTomeGUI(playerIn, stack);
+		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, stack);
 	}
 
 	@Override
@@ -75,8 +77,8 @@ public class ItemTome extends ItemMod {
 			for(String s : keys) {
 				NBTTagCompound cmp = data.getCompoundTag(s);
 				if(cmp != null) {
-					ItemStack modStack = ItemStack.loadItemStackFromNBT(cmp);
-					if(modStack != null) {
+					ItemStack modStack = new ItemStack(cmp);
+					if(!modStack.isEmpty()) {
 						String name = modStack.getDisplayName();
 						if(modStack.hasTagCompound() && modStack.getTagCompound().hasKey(MorphingHandler.TAG_TOME_DISPLAY_NAME))
 							name = modStack.getTagCompound().getString(MorphingHandler.TAG_TOME_DISPLAY_NAME);

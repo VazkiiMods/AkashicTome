@@ -31,14 +31,14 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void openTomeGUI(EntityPlayer player, ItemStack stack) {
 		Minecraft mc = Minecraft.getMinecraft();
-		if(mc.thePlayer == player)
+		if(mc.player == player)
 			mc.displayGuiScreen(new GuiTome(stack));
 	}
 	
 	@Override
 	public boolean openWikiPage(World world, Block block, RayTraceResult pos) {
 		IWikiProvider wiki = WikiHooks.getWikiFor(block);
-		String url = wiki.getWikiURL(world, pos, Minecraft.getMinecraft().thePlayer);
+		String url = wiki.getWikiURL(world, pos, Minecraft.getMinecraft().player);
 		if(url != null && !url.isEmpty()) {
 			try {
 				Desktop.getDesktop().browse(new URI(url));
