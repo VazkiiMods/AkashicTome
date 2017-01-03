@@ -35,7 +35,7 @@ public class ItemTome extends ItemMod {
 
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		ItemStack stack = playerIn.getActiveItemStack();
+		ItemStack stack = playerIn.getHeldItem(hand);
 		if(playerIn.isSneaking()) {
 			String mod = MorphingHandler.getModFromState(worldIn.getBlockState(pos)); 
 			ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, mod);
@@ -55,7 +55,7 @@ public class ItemTome extends ItemMod {
 
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand hand) {
-		ItemStack stack = playerIn.getActiveItemStack();
+		ItemStack stack = playerIn.getHeldItem(hand);
 		AkashicTome.proxy.openTomeGUI(playerIn, stack);
 		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, stack);
 	}
