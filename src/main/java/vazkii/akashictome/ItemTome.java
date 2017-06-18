@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -17,9 +18,6 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.oredict.RecipeSorter;
-import net.minecraftforge.oredict.RecipeSorter.Category;
 import vazkii.arl.item.ItemMod;
 
 public class ItemTome extends ItemMod {
@@ -29,8 +27,7 @@ public class ItemTome extends ItemMod {
 		setMaxStackSize(1);
 		setCreativeTab(CreativeTabs.TOOLS);
 
-		GameRegistry.addRecipe(new AttachementRecipe());
-		RecipeSorter.register("akashictome:attachment", AttachementRecipe.class, Category.SHAPELESS, "");
+		new AttachementRecipe();
 	}
 
 	@Override
@@ -59,9 +56,9 @@ public class ItemTome extends ItemMod {
 		AkashicTome.proxy.openTomeGUI(playerIn, stack);
 		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, stack);
 	}
-
+	
 	@Override
-	public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced) {
+	public void addInformation(ItemStack stack, World playerIn, List<String> tooltip, ITooltipFlag advanced) {
 		if(!stack.hasTagCompound() || !stack.getTagCompound().hasKey(MorphingHandler.TAG_TOME_DATA))
 			return;
 

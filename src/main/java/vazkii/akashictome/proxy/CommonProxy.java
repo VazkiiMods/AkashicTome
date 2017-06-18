@@ -9,18 +9,18 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import vazkii.akashictome.ModItems;
 import vazkii.akashictome.MorphingHandler;
 import vazkii.akashictome.WikiFallback;
 import vazkii.akashictome.network.MessageRegister;
+import vazkii.arl.recipe.RecipeHandler;
 
 public class CommonProxy {
 
 	public void preInit() {
 		ModItems.init();
 		
-		GameRegistry.addShapelessRecipe(new ItemStack(ModItems.tome), new ItemStack(Items.BOOK), new ItemStack(Blocks.BOOKSHELF));
+		RecipeHandler.addShapelessRecipe(new ItemStack(ModItems.tome), new ItemStack(Items.BOOK), new ItemStack(Blocks.BOOKSHELF));
 		
 		MinecraftForge.EVENT_BUS.register(MorphingHandler.INSTANCE);
 		initHUD();
