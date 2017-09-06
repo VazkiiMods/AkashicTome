@@ -34,12 +34,16 @@ public class ConfigHandler {
 		allItems = loadPropBool("Allow all items to be added", false);
 		
 		whitelistedItems = loadPropStringList("Whitelisted Items", "roots:runedTablet", "opencomputers:tool:4", "immersiveengineering:tool:3");
-		whitelistedNames = loadPropStringList("Whitelisted Names", "book", "tome", "lexicon", "nomicon", "manual", "knowledge", "pedia", "compendium", "guide");
+		whitelistedNames = loadPropStringList("Whitelisted Names", "book", "tome", "lexicon", "nomicon", "manual", "knowledge", "pedia", "compendium", "guide", "codex", "journal");
 		blacklistedMods = loadPropStringList("Blacklisted Mods");
 
 		aliases.clear();
-		List<String> aliasesList = loadPropStringList("Mod Aliases", "botanicaladdons=botania", "ThermalDynamics=ThermalExpansion", "rftoolsdim=rftools");
-		for(String s : aliasesList)
+		List<String> aliasesList = loadPropStringList("Mod Aliases", 
+				"nautralpledge=botania", 
+				"thermalexpansion=thermalfoundation",
+				"thermaldynamics=thermalfoundation",
+				"thermalcultivation=thermalfoundation", 
+				"rftoolsdim=rftools");		for(String s : aliasesList)
 			if(s.matches(".+?=.+")) {
 				String[] tokens = s.toLowerCase().split("=");
 				aliases.put(tokens[0], tokens[1]);
