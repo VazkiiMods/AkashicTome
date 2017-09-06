@@ -78,8 +78,8 @@ public class HUDHandler {
 
 					mc.getRenderItem().renderItemIntoGUI(drawStack, sx, sy);
 					GlStateManager.disableLighting();
-					mc.fontRendererObj.drawStringWithShadow(line1, sx + 20, sy + 4, 0xFFFFFFFF);
-					mc.fontRendererObj.drawStringWithShadow(line2, sx + 25, sy + 14, 0xFFFFFFFF);
+					mc.fontRenderer.drawStringWithShadow(line1, sx + 20, sy + 4, 0xFFFFFFFF);
+					mc.fontRenderer.drawStringWithShadow(line2, sx + 25, sy + 14, 0xFFFFFFFF);
 					GlStateManager.color(1F, 1F, 1F, 1F);
 				}
 			}

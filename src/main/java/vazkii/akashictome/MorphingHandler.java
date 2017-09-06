@@ -73,7 +73,7 @@ public final class MorphingHandler {
 			copyCmp.removeTag(TAG_TOME_DISPLAY_NAME);
 			copyCmp.removeTag(TAG_TOME_DATA);
 
-			e.setEntityItemStack(copy);
+			e.setItem(copy);
 		}
 	}
 

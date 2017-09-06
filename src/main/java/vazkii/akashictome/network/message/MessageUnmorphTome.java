@@ -15,7 +15,7 @@ public class MessageUnmorphTome extends NetworkMessage {
 	
 	@Override
 	public IMessage handleMessage(MessageContext context) {
-		EntityPlayer player = context.getServerHandler().playerEntity;
+		EntityPlayer player = context.getServerHandler().player;
 		ItemStack stack = player.getHeldItemMainhand();
 		if(stack != null && MorphingHandler.isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
 			ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, MorphingHandler.MINECRAFT);

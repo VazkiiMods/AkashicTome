@@ -21,7 +21,7 @@ public class MessageMorphTome extends NetworkMessage {
 	
 	@Override
 	public IMessage handleMessage(MessageContext context) {
-		EntityPlayer player = context.getServerHandler().playerEntity;
+		EntityPlayer player = context.getServerHandler().player;
 		ItemStack tomeStack = player.getHeldItemMainhand();
 		EnumHand hand = EnumHand.MAIN_HAND;
 		
