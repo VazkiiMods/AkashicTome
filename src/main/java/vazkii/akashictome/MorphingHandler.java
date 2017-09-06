@@ -44,13 +44,14 @@ public final class MorphingHandler {
 			return;
 
 		EntityItem e = event.getEntityItem();
-		ItemStack stack = e.getEntityItem();
+		ItemStack stack = e.getItem();
 		if(!stack.isEmpty() && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
 			NBTTagCompound morphData = (NBTTagCompound) stack.getTagCompound().getCompoundTag(TAG_TOME_DATA).copy();
+			String currentMod = ItemNBTHelper.getString(stack, TAG_ITEM_DEFINED_MOD, getModFromStack(stack));
 
 			ItemStack morph = makeMorphedStack(stack, MINECRAFT, morphData);
 			NBTTagCompound newMorphData = morph.getTagCompound().getCompoundTag(TAG_TOME_DATA);
-			newMorphData.removeTag(getModFromStack(stack));
+			newMorphData.removeTag(currentMod);
 
 			if(!e.getEntityWorld().isRemote) {
 				EntityItem newItem = new EntityItem(e.getEntityWorld(), e.posX, e.posY, e.posZ, morph);
