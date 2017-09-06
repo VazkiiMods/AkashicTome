@@ -21,7 +21,8 @@ public class CommonProxy {
 		ModItems.init();
 		
 		RecipeHandler.addShapelessRecipe(new ItemStack(ModItems.tome), new ItemStack(Items.BOOK), new ItemStack(Blocks.BOOKSHELF));
-		
+		RecipeHandler.addShapelessRecipe(new ItemStack(ModItems.tome), new ItemStack(Items.BOOK), "bookshelf");
+
 		MinecraftForge.EVENT_BUS.register(MorphingHandler.INSTANCE);
 		initHUD();
 		
