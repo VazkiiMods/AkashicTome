@@ -94,6 +94,9 @@ public class AttachementRecipe extends ModRecipe {
 		if(ConfigHandler.blacklistedMods.contains(mod))
 			return false;
 
+		if(stack.getItem() instanceof IModdedBook)
+			return true;
+
 		ResourceLocation registryNameRL = stack.getItem().getRegistryName();
 		String registryName = registryNameRL.toString();
 		if(ConfigHandler.whitelistedItems.contains(registryName) || ConfigHandler.whitelistedItems.contains(registryName + ":" + stack.getItemDamage()))
