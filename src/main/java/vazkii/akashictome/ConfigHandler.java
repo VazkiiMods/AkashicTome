@@ -33,17 +33,36 @@ public class ConfigHandler {
 	public static void load() {
 		allItems = loadPropBool("Allow all items to be added", false);
 		
-		whitelistedItems = loadPropStringList("Whitelisted Items", "roots:runedTablet", "opencomputers:tool:4", "immersiveengineering:tool:3", "integrateddynamics:on_the_dynamics_of_integration", "theoneprobe:probenote");
+		whitelistedItems = loadPropStringList("Whitelisted Items", 
+									"roots:runedtablet", 
+									"opencomputers:tool:4", 
+									"immersiveengineering:tool:3", 
+									"integrateddynamics:on_the_dynamics_of_integration", 
+									"theoneprobe:probenote",
+									"evilcraft:origins_of_darkness",
+									"draconicevolution:info_tablet",
+									"charset:tablet");
+		
 		whitelistedNames = loadPropStringList("Whitelisted Names", "book", "tome", "lexicon", "nomicon", "manual", "knowledge", "pedia", "compendium", "guide", "codex", "journal");
+		
 		blacklistedMods = loadPropStringList("Blacklisted Mods");
 
 		aliases.clear();
 		List<String> aliasesList = loadPropStringList("Mod Aliases", 
 				"nautralpledge=botania", 
+				"incorporeal=botania",
 				"thermalexpansion=thermalfoundation",
 				"thermaldynamics=thermalfoundation",
 				"thermalcultivation=thermalfoundation", 
-				"rftoolsdim=rftools");		for(String s : aliasesList)
+				"redstonearsenal=thermalfoundation",
+				"rftoolsdim=rftools",
+				"ae2stuff=appliedenergistics2",
+				"animus=bloodmagic",
+				"integrateddynamics=integratedtunnels",
+				"mekanismgenerators=mekanism",
+				"mekanismtools=mekanism");		
+		
+		for(String s : aliasesList)
 			if(s.matches(".+?=.+")) {
 				String[] tokens = s.toLowerCase().split("=");
 				aliases.put(tokens[0], tokens[1]);
