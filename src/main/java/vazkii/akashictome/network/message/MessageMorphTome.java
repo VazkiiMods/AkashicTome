@@ -1,44 +1,49 @@
 package vazkii.akashictome.network.message;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import vazkii.akashictome.ModItems;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Hand;
+import net.minecraftforge.fml.network.NetworkEvent;
 import vazkii.akashictome.MorphingHandler;
-import vazkii.arl.network.NetworkMessage;
+import vazkii.akashictome.Registrar;
 
-public class MessageMorphTome extends NetworkMessage {
+import java.util.function.Supplier;
 
-	public String modid;
-	
-	public MessageMorphTome() { }
-	
+public class MessageMorphTome {
+
+	private final String modid;
+
 	public MessageMorphTome(String modid) {
 		this.modid = modid;
 	}
-	
-	@Override
-	public IMessage handleMessage(MessageContext context) {
-		EntityPlayer player = context.getServerHandler().player;
+
+	public static MessageMorphTome decode(PacketBuffer buffer) {
+		return new MessageMorphTome(buffer.readString(64));
+	}
+
+	public void encode(PacketBuffer buffer) {
+		buffer.writeString(modid, 64);
+	}
+
+	public void handle(Supplier<NetworkEvent.Context> ctx) {
+		ctx.get().setPacketHandled(true);
+
+		ServerPlayerEntity player = ctx.get().getSender();
 		ItemStack tomeStack = player.getHeldItemMainhand();
-		EnumHand hand = EnumHand.MAIN_HAND;
-		
-		boolean hasTome = tomeStack != null && tomeStack.getItem() == ModItems.tome;
-		if(!hasTome) {
+		Hand hand = Hand.MAIN_HAND;
+
+		boolean hasTome = tomeStack.getItem() == Registrar.TOME;
+		if (!hasTome) {
 			tomeStack = player.getHeldItemOffhand();
-			hasTome = tomeStack != null && tomeStack.getItem() == ModItems.tome;
-			hand = EnumHand.OFF_HAND;
+			hasTome = tomeStack.getItem() == Registrar.TOME;
+			hand = Hand.OFF_HAND;
 		}
-		
-		if(!hasTome)
-			return null;
-		
+
+		if (!hasTome)
+			return;
+
 		ItemStack newStack = MorphingHandler.getShiftStackForMod(tomeStack, modid);
 		player.setHeldItem(hand, newStack);
-		
-		return null;
 	}
-	
 }

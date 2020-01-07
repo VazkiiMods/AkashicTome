@@ -1,134 +1,154 @@
 package vazkii.akashictome.client;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.MainWindow;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.renderer.Matrix4f;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.entity.model.BookModel;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
+import org.lwjgl.opengl.GL11;
+import vazkii.akashictome.MorphingHandler;
+import vazkii.akashictome.network.PacketHandler;
+import vazkii.akashictome.network.message.MessageMorphTome;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.util.glu.GLU;
+public class GuiTome extends Screen {
 
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.model.ModelBook;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextFormatting;
-import vazkii.akashictome.MorphingHandler;
-import vazkii.akashictome.network.message.MessageMorphTome;
-import vazkii.arl.network.NetworkHandler;
-import vazkii.arl.util.ItemNBTHelper;
+	private static final ResourceLocation texture = new ResourceLocation("akashictome:textures/models/book.png");
+	private static final BookModel modelBook = new BookModel();
 
-public class GuiTome extends GuiScreen {
+	private final ItemStack tome;
 
-	ResourceLocation texture = new ResourceLocation("akashictome:textures/models/book.png");
-	ModelBook modelBook = new ModelBook();
-	
-	ItemStack tome;
-	
+	private ItemStack tooltipStack = ItemStack.EMPTY;
+	private int currentX, currentY;
+
 	public GuiTome(ItemStack tome) {
+		super(tome.getDisplayName());
 		this.tome = tome;
 	}
-	
-	@Override
-	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-		super.drawScreen(mouseX, mouseY, partialTicks);
-		
-		List<ItemStack> stacks = new ArrayList();
 
-		if(tome.hasTagCompound()) {
-			NBTTagCompound data = tome.getTagCompound().getCompoundTag(MorphingHandler.TAG_TOME_DATA);
-			List<String> keys = new ArrayList(data.getKeySet());
+	@Override
+	public boolean isPauseScreen() {
+		return false;
+	}
+
+	@Override
+	public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+		if (mouseButton == 0 && !tooltipStack.isEmpty()) {
+			if (mouseX > currentX && mouseY > currentY && mouseX <= (currentX + 16) && mouseY <= (currentY + 16)) {
+				String definedMod = MorphingHandler.getDefinedModFromStack(tooltipStack);
+				PacketHandler.sendToServer(new MessageMorphTome(definedMod));
+				minecraft.displayGuiScreen(null);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public void render(int mouseX, int mouseY, float partialTicks) {
+		super.render(mouseX, mouseY, partialTicks);
+
+		List<ItemStack> stacks = new ArrayList<>();
+
+		CompoundNBT tomeData = tome.getChildTag(MorphingHandler.TAG_TOME_DATA);
+		if (tomeData != null) {
+			List<String> keys = new ArrayList<>(tomeData.keySet());
 			Collections.sort(keys);
-			
-			for(String s : keys) {
-				NBTTagCompound cmp = data.getCompoundTag(s);
-				if(cmp != null) {
-					ItemStack modStack = new ItemStack(cmp);
-					stacks.add(modStack);
-				}
+
+			for (String s : keys) {
+				CompoundNBT cmp = tomeData.getCompound(s);
+				ItemStack modStack = ItemStack.read(cmp);
+				stacks.add(modStack);
 			}
 		}
 
-		ScaledResolution res = new ScaledResolution(mc);
-		int centerX = res.getScaledWidth() / 2;
-		int centerY = res.getScaledHeight() / 2;
-		
+		MainWindow window = minecraft.mainWindow;
+		int scaledWidth = window.getScaledWidth();
+		int scaledHeight = window.getScaledHeight();
+		int guiScaleFactor = (int) window.getGuiScaleFactor();
+
+		int centerX = scaledWidth / 2;
+		int centerY = scaledHeight / 2;
+
 		int amountPerRow = 6;
 		int rows = stacks.size() / amountPerRow + 1;
 		int iconSize = 20;
-		
+
 		int startX = centerX - (amountPerRow * iconSize) / 2;
 		int startY = centerY - (rows * iconSize) + 45;
-		
+
 		int padding = 4;
 		int extra = 2;
-		drawRect(startX - padding, startY - padding, startX + iconSize * amountPerRow + padding, startY + iconSize * rows + padding, 0x22000000);
-		drawRect(startX - padding - extra, startY - padding - extra, startX + iconSize * amountPerRow + padding + extra, startY + iconSize * rows + padding + extra, 0x22000000);
+		fill(startX - padding, startY - padding, startX + iconSize * amountPerRow + padding, startY + iconSize * rows + padding, 0x22000000);
+		fill(startX - padding - extra, startY - padding - extra, startX + iconSize * amountPerRow + padding + extra, startY + iconSize * rows + padding + extra, 0x22000000);
 
-		ItemStack tooltipStack = ItemStack.EMPTY;
-		
-		if(!stacks.isEmpty()) {
+		tooltipStack = ItemStack.EMPTY;
+
+		if (!stacks.isEmpty()) {
 			RenderHelper.enableGUIStandardItemLighting();
-			for(int i = 0; i < stacks.size(); i++) {
+			for (int i = 0; i < stacks.size(); i++) {
 				int x = startX + (i % amountPerRow) * iconSize;
 				int y = startY + (i / amountPerRow) * iconSize;
 				ItemStack stack = stacks.get(i);
-				
-				if(mouseX > x && mouseY > y && mouseX <= (x + 16) && mouseY <= (y + 16)) {
+
+				if (mouseX > x && mouseY > y && mouseX <= (x + 16) && mouseY <= (y + 16)) {
 					tooltipStack = stack;
+					currentX = x;
+					currentY = y;
 					y -= 2;
 				}
-				
-				itemRender.renderItemAndEffectIntoGUI(stack, x, y);
+
+				itemRenderer.renderItemAndEffectIntoGUI(stack, x, y);
 			}
 			RenderHelper.disableStandardItemLighting();
 		}
-		
-		GL11.glPushMatrix();
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glPushMatrix();
-		GL11.glLoadIdentity();
-		GL11.glViewport((res.getScaledWidth() - 320) / 2 * res.getScaleFactor(), (res.getScaledHeight() - 240) / 2 * res.getScaleFactor(), 320 * res.getScaleFactor(), 240 * res.getScaleFactor());
-		GL11.glTranslatef(0F, -0.15F, 0F);
-		GLU.gluPerspective(90F, 1.3333334F, 9F, 80F);
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		GL11.glLoadIdentity();
+
+		GlStateManager.pushMatrix();
+		GlStateManager.matrixMode(GL11.GL_PROJECTION);
+		GlStateManager.pushMatrix();
+		GlStateManager.loadIdentity();
+		GlStateManager.viewport((scaledWidth - 320) / 2 * guiScaleFactor, (scaledHeight - 240) / 2 * guiScaleFactor, 320 * guiScaleFactor, 240 * guiScaleFactor);
+		GlStateManager.translatef(0F, -0.15F, 0F);
+		GlStateManager.multMatrix(Matrix4f.perspective(90F, 1.3333334F, 9F, 80F));
+		GlStateManager.matrixMode(GL11.GL_MODELVIEW);
+		GlStateManager.loadIdentity();
 		RenderHelper.enableStandardItemLighting();
-		GL11.glTranslatef(-0.1F, -9F, -16F);
-		GL11.glScalef(1F, 1F, 1F);
-		GL11.glRotatef(-100F, 1, 0F, 0F);
-		GL11.glRotatef(4F * 90F - 90F, 0F, 1F, 0F);
-		GL11.glRotatef(180F, 1F, 0F, 0F);
-		GL11.glColor4f(1F, 1F, 1F, 1F);
-		mc.renderEngine.bindTexture(texture);
-		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-		modelBook.render(null, 0F, 0F, 0F, 1F, 0F, 1.2F);
-		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+		GlStateManager.translatef(-0.1F, -9F, -16F);
+		GlStateManager.scalef(1F, 1F, 1F);
+		GlStateManager.rotatef(-100F, 1, 0F, 0F);
+		GlStateManager.rotatef(4F * 90F - 90F, 0F, 1F, 0F);
+		GlStateManager.rotatef(180F, 1F, 0F, 0F);
+		GlStateManager.color4f(1F, 1F, 1F, 1F);
+		minecraft.getTextureManager().bindTexture(texture);
+		GlStateManager.enableRescaleNormal();
+		modelBook.render(0F, 0F, 0F, 1F, 0F, 1.2F);
+		GlStateManager.disableRescaleNormal();
 		RenderHelper.disableStandardItemLighting();
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glViewport(0, 0, mc.displayWidth, mc.displayHeight);
-		GL11.glPopMatrix();
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		GL11.glPopMatrix();
+		GlStateManager.matrixMode(GL11.GL_PROJECTION);
+		GlStateManager.viewport(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight());
+		GlStateManager.popMatrix();
+		GlStateManager.matrixMode(GL11.GL_MODELVIEW);
+		GlStateManager.popMatrix();
 		RenderHelper.disableStandardItemLighting();
-		GL11.glColor4f(1F, 1F, 1F, 1F);
-		
-		if(!tooltipStack.isEmpty()) {
-			String name = ItemNBTHelper.getString(tooltipStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, tooltipStack.getDisplayName());
+		GlStateManager.color4f(1F, 1F, 1F, 1F);
+
+		if (!tooltipStack.isEmpty()) {
+			ITextComponent formattedName = MorphingHandler.getMorphedDisplayName(tooltipStack);
+
 			String definedMod = MorphingHandler.getModFromStack(tooltipStack);
 			String mod = TextFormatting.GRAY + MorphingHandler.getModNameForId(definedMod);
-			definedMod = ItemNBTHelper.getString(tooltipStack, MorphingHandler.TAG_ITEM_DEFINED_MOD, definedMod);
-			vazkii.arl.util.RenderHelper.renderTooltip(mouseX, mouseY, Arrays.asList(new String[] { name, mod }));
-			
-			if(Mouse.isButtonDown(0)) {
-				NetworkHandler.INSTANCE.sendToServer(new MessageMorphTome(definedMod));
-				mc.displayGuiScreen(null);
-			}
+			renderTooltip(Arrays.asList(formattedName.getFormattedText(), mod), mouseX, mouseY);
+
 		}
 	}
 

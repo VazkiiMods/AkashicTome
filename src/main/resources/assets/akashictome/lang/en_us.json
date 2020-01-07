@@ -1,0 +1,8 @@
+{
+  "akashictome.sudo_name": "Akashic Tome (%s)",
+  "akashictome.clickMorph": "Shift-right click to change",
+  "akashictome.moreInfo": "Hold %s for more info",
+  "akashictome.empty": "Empty. Craft with guides and manuals to fill!",
+
+  "item.akashictome.tome": "Akashic Tome"
+}

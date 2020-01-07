@@ -1,23 +1,23 @@
 package vazkii.akashictome;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import vazkii.akashictome.network.PacketHandler;
+import vazkii.akashictome.network.message.MessageUnmorphTome;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.ModContainer;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import vazkii.akashictome.network.message.MessageUnmorphTome;
-import vazkii.arl.network.NetworkHandler;
-import vazkii.arl.util.ItemNBTHelper;
 
 public final class MorphingHandler {
 
@@ -33,147 +33,156 @@ public final class MorphingHandler {
 	@SubscribeEvent
 	public void onPlayerLeftClick(PlayerInteractEvent.LeftClickEmpty event) {
 		ItemStack stack = event.getItemStack();
-		if(stack != null && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
-			NetworkHandler.INSTANCE.sendToServer(new MessageUnmorphTome());
+		if (isAkashicTome(stack) && stack.getItem() != Registrar.TOME) {
+			PacketHandler.sendToServer(new MessageUnmorphTome());
 		}
 	}
 
 	@SubscribeEvent
 	public void onItemDropped(ItemTossEvent event) {
-		if(!event.getPlayer().isSneaking())
+		if (!event.getPlayer().isSneaking())
 			return;
 
-		EntityItem e = event.getEntityItem();
+		ItemEntity e = event.getEntityItem();
 		ItemStack stack = e.getItem();
-		if(!stack.isEmpty() && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
-			NBTTagCompound morphData = (NBTTagCompound) stack.getTagCompound().getCompoundTag(TAG_TOME_DATA).copy();
-			String currentMod = ItemNBTHelper.getString(stack, TAG_ITEM_DEFINED_MOD, getModFromStack(stack));
+		if (!stack.isEmpty() && isAkashicTome(stack) && stack.getItem() != Registrar.TOME) {
+			CompoundNBT morphData = stack.getChildTag(TAG_TOME_DATA).copy();
+			String currentMod = getDefinedModFromStack(stack);
 
 			ItemStack morph = makeMorphedStack(stack, MINECRAFT, morphData);
-			NBTTagCompound newMorphData = morph.getTagCompound().getCompoundTag(TAG_TOME_DATA);
-			newMorphData.removeTag(currentMod);
+			CompoundNBT newMorphData = morph.getChildTag(TAG_TOME_DATA);
+			newMorphData.remove(currentMod);
 
-			if(!e.getEntityWorld().isRemote) {
-				EntityItem newItem = new EntityItem(e.getEntityWorld(), e.posX, e.posY, e.posZ, morph);
-				e.getEntityWorld().spawnEntity(newItem);
+			if (!e.getEntityWorld().isRemote) {
+				ItemEntity newItem = new ItemEntity(e.getEntityWorld(), e.posX, e.posY, e.posZ, morph);
+				e.getEntityWorld().addEntity(newItem);
 			}
 
 			ItemStack copy = stack.copy();
-			NBTTagCompound copyCmp = copy.getTagCompound();
-			if(copyCmp == null) {
-				copyCmp = new NBTTagCompound();
-				copy.setTagCompound(copyCmp);
+			CompoundNBT copyCmp = copy.getTag();
+			if (copyCmp == null) {
+				copyCmp = new CompoundNBT();
+				copy.setTag(copyCmp);
 			}
 
-			copyCmp.removeTag("display");
-			String displayName = copyCmp.getString(TAG_TOME_DISPLAY_NAME);
-			if(!displayName.isEmpty() && !displayName.equals(copy.getDisplayName()))
-				copy.setStackDisplayName(displayName);
+			copyCmp.remove("display");
 
-			copyCmp.removeTag(TAG_MORPHING);
-			copyCmp.removeTag(TAG_TOME_DISPLAY_NAME);
-			copyCmp.removeTag(TAG_TOME_DATA);
+			String displayName = copyCmp.getString(TAG_TOME_DISPLAY_NAME);
+			if (!displayName.isEmpty()) {
+				ITextComponent deserializedName = ITextComponent.Serializer.fromJson(displayName);
+				if (!deserializedName.equals(copy.getDisplayName()))
+					copy.setDisplayName(deserializedName);
+			}
+
+			copyCmp.remove(TAG_MORPHING);
+			copyCmp.remove(TAG_TOME_DISPLAY_NAME);
+			copyCmp.remove(TAG_TOME_DATA);
+			copyCmp.remove(TAG_ITEM_DEFINED_MOD);
 
 			e.setItem(copy);
 		}
 	}
 
-	public static String getModFromState(IBlockState state) {
-		return getModOrAlias(state.getBlock().getRegistryName().getResourceDomain());
+	public static String getModFromState(BlockState state) {
+		return getModOrAlias(state.getBlock().getRegistryName().getNamespace());
 	}
 
 	public static String getModFromStack(ItemStack stack) {
 		return getModOrAlias(stack.isEmpty() ? MINECRAFT : stack.getItem().getCreatorModId(stack));
 	}
 
-	public static String getModOrAlias(String mod) {
-		return ConfigHandler.aliases.containsKey(mod) ? ConfigHandler.aliases.get(mod) : mod;
+	public static String getDefinedModFromStack(ItemStack stack) {
+		if (stack.hasTag() && stack.getTag().contains(TAG_ITEM_DEFINED_MOD)) {
+			return stack.getTag().getString(TAG_ITEM_DEFINED_MOD);
+		}
+		return getModFromStack(stack);
 	}
-	
-	public static boolean doesStackHaveModAttached(ItemStack stack, String mod) {
-		if(!stack.hasTagCompound())
-			return false;
-		
-		NBTTagCompound morphData = stack.getTagCompound().getCompoundTag(TAG_TOME_DATA);
-		return morphData.hasKey(mod);
+
+	public static String getModOrAlias(String mod) {
+		return ConfigHandler.aliases.getOrDefault(mod, mod);
+	}
+
+	public static ITextComponent getMorphedDisplayName(ItemStack stack) {
+		if (stack.hasTag() && stack.getTag().contains(TAG_TOME_DISPLAY_NAME)) {
+			String string = stack.getTag().getString(TAG_TOME_DISPLAY_NAME);
+			if (!string.isEmpty())
+				return ITextComponent.Serializer.fromJson(string);
+		}
+		return stack.getDisplayName();
 	}
 
 	public static ItemStack getShiftStackForMod(ItemStack stack, String mod) {
-		if(!stack.hasTagCompound())
+		if (!stack.hasTag())
 			return stack;
 
 		String currentMod = getModFromStack(stack);
-		if(mod.equals(currentMod))
+		if (mod.equals(currentMod))
 			return stack;
 
-		NBTTagCompound morphData = stack.getTagCompound().getCompoundTag(TAG_TOME_DATA);
+		CompoundNBT morphData = stack.getOrCreateChildTag(TAG_TOME_DATA);
 		return makeMorphedStack(stack, mod, morphData);
 	}
 
-	public static ItemStack makeMorphedStack(ItemStack currentStack, String targetMod, NBTTagCompound morphData) {
-		String currentMod = ItemNBTHelper.getString(currentStack, TAG_ITEM_DEFINED_MOD, getModFromStack(currentStack));
+	public static ItemStack makeMorphedStack(ItemStack currentStack, String targetMod, CompoundNBT morphData) {
+		String currentMod = getDefinedModFromStack(currentStack);
 
-		NBTTagCompound currentCmp = new NBTTagCompound();
-		currentStack.writeToNBT(currentCmp);
-		currentCmp = (NBTTagCompound) currentCmp.copy();
-		if(currentCmp.hasKey("tag"))
-			currentCmp.getCompoundTag("tag").removeTag(TAG_TOME_DATA);
+		CompoundNBT currentCmp = currentStack.write(new CompoundNBT()).copy();
 
-		if(!currentMod.equalsIgnoreCase(MINECRAFT) && !currentMod.equalsIgnoreCase(AkashicTome.MOD_ID))
-			morphData.setTag(currentMod, currentCmp);
+		if (currentCmp.contains("tag"))
+			currentCmp.getCompound("tag").remove(TAG_TOME_DATA);
+
+		if (!currentMod.equalsIgnoreCase(MINECRAFT) && !currentMod.equalsIgnoreCase(AkashicTome.MOD_ID))
+			morphData.put(currentMod, currentCmp);
 
 		ItemStack stack;
-		if(targetMod.equals(MINECRAFT))
-			stack = new ItemStack(ModItems.tome);
+		if (targetMod.equals(MINECRAFT))
+			stack = new ItemStack(Registrar.TOME);
 		else {
-			NBTTagCompound targetCmp = morphData.getCompoundTag(targetMod);
-			morphData.removeTag(targetMod);
+			CompoundNBT targetCmp = morphData.getCompound(targetMod);
+			morphData.remove(targetMod);
 
-			stack = new ItemStack(targetCmp);
-			if(stack.isEmpty())
-				stack = new ItemStack(ModItems.tome);
+			stack = ItemStack.read(targetCmp);
+			if (stack.isEmpty())
+				stack = new ItemStack(Registrar.TOME);
 		}
+		
+		CompoundNBT stackCmp = stack.getOrCreateTag();
+		stackCmp.put(TAG_TOME_DATA, morphData);
+		stackCmp.putBoolean(TAG_MORPHING, true);
 
-		if(!stack.hasTagCompound())
-			stack.setTagCompound(new NBTTagCompound());
+		if (stack.getItem() != Registrar.TOME) {
+			ITextComponent displayName = stack.getDisplayName();
+			if (stackCmp.contains(TAG_TOME_DISPLAY_NAME))
+				displayName = ITextComponent.Serializer.fromJson(stackCmp.getString(TAG_TOME_DISPLAY_NAME));
+			else stackCmp.putString(TAG_TOME_DISPLAY_NAME, ITextComponent.Serializer.toJson(stack.getDisplayName()));
 
-		NBTTagCompound stackCmp = stack.getTagCompound();
-		stackCmp.setTag(TAG_TOME_DATA, morphData);
-		stackCmp.setBoolean(TAG_MORPHING, true);
-
-		if(stack.getItem() != ModItems.tome) {
-			String displayName = stack.getDisplayName();
-			if(stackCmp.hasKey(TAG_TOME_DISPLAY_NAME))
-				displayName = stackCmp.getString(TAG_TOME_DISPLAY_NAME);
-			else stackCmp.setString(TAG_TOME_DISPLAY_NAME, displayName);
-
-			stack.setStackDisplayName(TextFormatting.RESET + I18n.translateToLocalFormatted("akashictome.sudo_name", TextFormatting.GREEN + displayName + TextFormatting.RESET));
+			stack.setDisplayName(new TranslationTextComponent("akashictome.sudo_name", displayName.deepCopy().applyTextStyle(TextFormatting.GREEN)));
 		}
 
 		stack.setCount(1);
 		return stack;
 	}
 
-	private static final Map<String, String> modNames = new HashMap<String, String>();
+	private static final Map<String, String> modNames = new HashMap<>();
 
 	static {
-		for(Map.Entry<String, ModContainer> modEntry : Loader.instance().getIndexedModList().entrySet())
-			modNames.put(modEntry.getKey().toLowerCase(Locale.ENGLISH),  modEntry.getValue().getName());
+		for (ModInfo modEntry : ModList.get().getMods())
+			modNames.put(modEntry.getModId(), modEntry.getDisplayName());
 	}
 
 	public static String getModNameForId(String modId) {
 		modId = modId.toLowerCase(Locale.ENGLISH);
-		return modNames.containsKey(modId) ? modNames.get(modId) : modId;
+		return modNames.getOrDefault(modId, modId);
 	}
 
 	public static boolean isAkashicTome(ItemStack stack) {
-		if(stack.isEmpty())
+		if (stack.isEmpty())
 			return false;
 
-		if(stack.getItem() == ModItems.tome)
+		if (stack.getItem() == Registrar.TOME)
 			return true;
 
-		return stack.hasTagCompound() && stack.getTagCompound().getBoolean(TAG_MORPHING);
+		return stack.hasTag() && stack.getTag().getBoolean(TAG_MORPHING);
 	}
 
 }

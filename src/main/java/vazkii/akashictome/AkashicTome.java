@@ -1,38 +1,43 @@
 package vazkii.akashictome;
 
-import akka.io.Tcp.Message;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import vazkii.akashictome.proxy.CommonProxy;
-import vazkii.arl.network.NetworkHandler;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import vazkii.akashictome.client.HUDHandler;
+import vazkii.akashictome.network.PacketHandler;
 
-@Mod(modid = AkashicTome.MOD_ID, name = AkashicTome.MOD_NAME, version = AkashicTome.VERSION, dependencies = AkashicTome.DEPENDENCIES, guiFactory = AkashicTome.GUI_FACTORY)
+@Mod(AkashicTome.MOD_ID)
 public class AkashicTome {
 
 	public static final String MOD_ID = "akashictome";
-	public static final String MOD_NAME = "Akashic Tome";
-	public static final String BUILD = "GRADLE:BUILD";
-	public static final String VERSION = "GRADLE:VERSION-" + BUILD;
-	public static final String DEPENDENCIES = "required-before:autoreglib";
-	public static final String GUI_FACTORY = "vazkii.akashictome.client.GuiFactory";
 
-	@SidedProxy(clientSide = "vazkii.akashictome.proxy.ClientProxy", serverSide = "vazkii.akashictome.proxy.CommonProxy")
-	public static CommonProxy proxy;
+	public AkashicTome() {
+		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.SPEC);
 
-	@EventHandler
-	public void preInit(FMLPreInitializationEvent event) {
-		ConfigHandler.init(event.getSuggestedConfigurationFile());
-		
-		proxy.preInit();
+		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+		bus.addGenericListener(Item.class, Registrar::registerItems);
+		bus.addGenericListener(IRecipeSerializer.class, Registrar::registerRecipeSerializers);
+		bus.addListener(ConfigHandler::onConfigLoad);
+		bus.addListener(ConfigHandler::onConfigReload);
+
+		bus.addListener(this::setup);
+		bus.addListener(this::clientSetup);
+	}
+
+	private void setup(FMLCommonSetupEvent event) {
+		MinecraftForge.EVENT_BUS.register(MorphingHandler.INSTANCE);
+		PacketHandler.init();
+	}
+
+	private void clientSetup(FMLClientSetupEvent event) {
+		MinecraftForge.EVENT_BUS.register(new HUDHandler());
 	}
 
 }

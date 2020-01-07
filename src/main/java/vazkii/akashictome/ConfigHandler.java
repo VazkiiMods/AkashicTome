@@ -1,94 +1,87 @@
 package vazkii.akashictome;
 
-import java.io.File;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.config.ModConfig;
+
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import java.util.Set;
 
 public class ConfigHandler {
+	public static ForgeConfigSpec.BooleanValue allItems;
 
-	public static Configuration config;
+	public static ForgeConfigSpec.ConfigValue<List<? extends String>> whitelistedNames;
+	public static ForgeConfigSpec.ConfigValue<List<? extends String>> blacklistedMods;
 
-	public static boolean allItems;
-	public static List<String> whitelistedItems, whitelistedNames, blacklistedMods;
+	public static final Map<String, String> aliases = new HashMap<>();
+	public static final Set<ResourceLocation> whitelistedItems = new HashSet<>();
 
-	public static Map<String, String> aliases = new HashMap();
+	private static ForgeConfigSpec.ConfigValue<List<? extends String>> rawAliases;
+	private static ForgeConfigSpec.ConfigValue<List<? extends String>> rawWhitelistedItems;
 
-	public static void init(File configFile) {
-		config = new Configuration(configFile);
+	static final ForgeConfigSpec SPEC = new ForgeConfigSpec.Builder().configure(ConfigHandler::new).getRight();
+	
+	private ConfigHandler(ForgeConfigSpec.Builder builder) {
+		allItems = builder.comment("Allow all items to be added to the tome").define("allowAllItems", false);
 
-		config.load();
-		load();
+		rawWhitelistedItems = builder.comment("Whitelisted Items").defineList("whitelistedItems", Arrays.asList(
+				"roots:runedtablet",
+//				"opencomputers:tool:4", TODO check all those/find replacements
+//				"immersiveengineering:tool:3",
+				"integrateddynamics:on_the_dynamics_of_integration",
+				"theoneprobe:probenote",
+				"evilcraft:origins_of_darkness",
+				"draconicevolution:info_tablet",
+				"charset:tablet"),
+				s -> s instanceof String && ResourceLocation.isResouceNameValid((String) s));
 
-		MinecraftForge.EVENT_BUS.register(new ChangeListener());
-	}
+		whitelistedNames = builder.defineList("Whitelisted Names",
+				Arrays.asList("book", "tome", "lexicon", "nomicon", "manual",
+						"knowledge", "pedia", "compendium", "guide", "codex", "journal"),
+				s -> s instanceof String);
 
-	public static void load() {
-		allItems = loadPropBool("Allow all items to be added", false);
-		
-		whitelistedItems = loadPropStringList("Whitelisted Items", 
-									"roots:runedtablet", 
-									"opencomputers:tool:4", 
-									"immersiveengineering:tool:3", 
-									"integrateddynamics:on_the_dynamics_of_integration", 
-									"theoneprobe:probenote",
-									"evilcraft:origins_of_darkness",
-									"draconicevolution:info_tablet",
-									"charset:tablet");
-		
-		whitelistedNames = loadPropStringList("Whitelisted Names", "book", "tome", "lexicon", "nomicon", "manual", "knowledge", "pedia", "compendium", "guide", "codex", "journal");
-		
-		blacklistedMods = loadPropStringList("Blacklisted Mods");
+		blacklistedMods = builder.defineList("Blacklisted Mods", Collections.emptyList(), s -> true);
 
-		aliases.clear();
-		List<String> aliasesList = loadPropStringList("Mod Aliases", 
-				"nautralpledge=botania", 
+		rawAliases = builder.defineList("Mod Aliases", Arrays.asList(
+				"naturalpledge=botania",
 				"incorporeal=botania",
 				"thermalexpansion=thermalfoundation",
 				"thermaldynamics=thermalfoundation",
-				"thermalcultivation=thermalfoundation", 
+				"thermalcultivation=thermalfoundation",
 				"redstonearsenal=thermalfoundation",
 				"rftoolsdim=rftools",
 				"ae2stuff=appliedenergistics2",
 				"animus=bloodmagic",
 				"integrateddynamics=integratedtunnels",
 				"mekanismgenerators=mekanism",
-				"mekanismtools=mekanism");		
-		
-		for(String s : aliasesList)
-			if(s.matches(".+?=.+")) {
+				"mekanismtools=mekanism"),
+				s -> s instanceof String && ((String) s).split("=", 2).length == 2);
+	}
+
+	public static void onConfigLoad(ModConfig.Loading event) {
+		reload();
+	}
+
+	public static void onConfigReload(ModConfig.ConfigReloading event) {
+		reload();
+	}
+
+	private static void reload() {
+		aliases.clear();
+		for (String s : rawAliases.get())
+			if (s.matches(".+?=.+")) {
 				String[] tokens = s.toLowerCase().split("=");
 				aliases.put(tokens[0], tokens[1]);
 			}
 
-		if(config.hasChanged())
-			config.save();
-	}
-
-	public static List<String> loadPropStringList(String propName, String... default_) {
-		Property prop = config.get(Configuration.CATEGORY_GENERAL, propName, default_);
-		return Arrays.asList(prop.getStringList());
-	}
-
-	public static boolean loadPropBool(String propName, boolean default_) {
-		Property prop = config.get(Configuration.CATEGORY_GENERAL, propName, default_);
-		return prop.getBoolean(default_);
-	}
-
-	public static class ChangeListener {
-
-		@SubscribeEvent
-		public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
-			if(eventArgs.getModID().equals(AkashicTome.MOD_ID))
-				load();
+		whitelistedItems.clear();
+		for (String s : rawWhitelistedItems.get()) {
+			whitelistedItems.add(new ResourceLocation(s));
 		}
-
 	}
 }

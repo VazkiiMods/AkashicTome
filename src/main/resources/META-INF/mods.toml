@@ -1,0 +1,19 @@
+modLoader="javafml"
+loaderVersion="[28,)"
+issueTrackerURL="https://github.com/Vazkii/AkashicTome"
+
+[[mods]]
+modId="akashictome"
+displayName="Akashic Tome"
+version="${file.jarVersion}"
+authors="Vazkii"
+description='''
+The book of books.
+'''
+
+[[dependencies.akashictome]]
+    modId="forge"
+    mandatory=true
+    versionRange="[28.1.92,)"
+    ordering="AFTER"
+    side="BOTH"

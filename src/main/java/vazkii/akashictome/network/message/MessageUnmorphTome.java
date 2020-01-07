@@ -1,29 +1,32 @@
 package vazkii.akashictome.network.message;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import vazkii.akashictome.AkashicTome;
-import vazkii.akashictome.ModItems;
+import net.minecraft.util.Hand;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.network.NetworkEvent;
 import vazkii.akashictome.MorphingHandler;
-import vazkii.arl.network.NetworkMessage;
+import vazkii.akashictome.Registrar;
 
-public class MessageUnmorphTome extends NetworkMessage {
+import java.util.function.Supplier;
+
+public class MessageUnmorphTome {
 
 	public MessageUnmorphTome() { }
-	
-	@Override
-	public IMessage handleMessage(MessageContext context) {
-		EntityPlayer player = context.getServerHandler().player;
+
+	public void handle(Supplier<NetworkEvent.Context> ctx) {
+		ServerPlayerEntity player = ctx.get().getSender();
 		ItemStack stack = player.getHeldItemMainhand();
-		if(stack != null && MorphingHandler.isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
+		if (MorphingHandler.isAkashicTome(stack) && stack.getItem() != Registrar.TOME) {
 			ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, MorphingHandler.MINECRAFT);
+			newStack.removeChildTag(MorphingHandler.TAG_MORPHING);
 			player.inventory.setInventorySlotContents(player.inventory.currentItem, newStack);
-			AkashicTome.proxy.updateEquippedItem();
+			DistExecutor.runWhenOn(Dist.CLIENT, () -> () ->
+					Minecraft.getInstance().getFirstPersonRenderer().resetEquippedProgress(Hand.MAIN_HAND));
 		}
-		
-		return null;
+
+		ctx.get().setPacketHandled(true);
 	}
-	
 }
