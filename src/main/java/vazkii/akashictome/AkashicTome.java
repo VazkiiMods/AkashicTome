@@ -1,38 +1,45 @@
 package vazkii.akashictome;
 
-import akka.io.Tcp.Message;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.NetworkDirection;
+import vazkii.akashictome.network.MessageMorphTome;
+import vazkii.akashictome.network.MessageUnmorphTome;
+import vazkii.akashictome.proxy.ClientProxy;
 import vazkii.akashictome.proxy.CommonProxy;
+import vazkii.arl.network.IMessage;
 import vazkii.arl.network.NetworkHandler;
 
-@Mod(modid = AkashicTome.MOD_ID, name = AkashicTome.MOD_NAME, version = AkashicTome.VERSION, dependencies = AkashicTome.DEPENDENCIES, guiFactory = AkashicTome.GUI_FACTORY)
+@Mod(AkashicTome.MOD_ID)
 public class AkashicTome {
 
 	public static final String MOD_ID = "akashictome";
-	public static final String MOD_NAME = "Akashic Tome";
-	public static final String BUILD = "GRADLE:BUILD";
-	public static final String VERSION = "GRADLE:VERSION-" + BUILD;
-	public static final String DEPENDENCIES = "required-before:autoreglib";
-	public static final String GUI_FACTORY = "vazkii.akashictome.client.GuiFactory";
-
-	@SidedProxy(clientSide = "vazkii.akashictome.proxy.ClientProxy", serverSide = "vazkii.akashictome.proxy.CommonProxy")
+	public static NetworkHandler NETWORKHANDLER;
 	public static CommonProxy proxy;
 
-	@EventHandler
-	public void preInit(FMLPreInitializationEvent event) {
-		ConfigHandler.init(event.getSuggestedConfigurationFile());
-		
+	public AkashicTome() {
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.CONFIG_SPEC);
+
+		proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> CommonProxy::new);
 		proxy.preInit();
+		
+		ModItems.init();
+
+		NETWORKHANDLER = new NetworkHandler(MOD_ID, 1);
+	}
+
+	public void commonSetup(FMLCommonSetupEvent event) {
+		NETWORKHANDLER.register(MessageMorphTome.class, NetworkDirection.PLAY_TO_SERVER);
+		NETWORKHANDLER.register(MessageUnmorphTome.class, NetworkDirection.PLAY_TO_SERVER);
+	}
+	
+	public static void sendToServer(IMessage msg) {
+		NETWORKHANDLER.sendToServer(msg);
 	}
 
 }

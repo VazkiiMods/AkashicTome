@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[30,)"
+issueTrackerURL="https://github.com/Vazkii/AkashicTome"
+
+[[mods]]
+modId="akashictome"
+displayName="Akashic Tome"
+version="${version}"
+authors="Vazkii, MoreThanHidden"
+description='''
+The book to end all books.
+'''
+[[dependencies.akashictome]]
+    modId="autoreglib"
+    mandatory=true
+    versionRange="[1.5-36,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.akashictome]]
+    modId="forge"
+    mandatory=true
+    versionRange="[30.0.42,)"
+    ordering="AFTER"
+    side="BOTH"
