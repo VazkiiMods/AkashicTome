@@ -34,7 +34,8 @@ public class ConfigHandler {
 						"theoneprobe:probenote",
 						"evilcraft:origins_of_darkness",
 						"draconicevolution:info_tablet",
-						"charset:tablet"));
+						"charset:tablet", 
+					        "occultism:dictionary_of_spirits"));
 		
 		whitelistedNames = builder.define("Whitelisted Names", Arrays.asList("book", "tome", "lexicon", "nomicon", "manual", "knowledge", "pedia", "compendium", "guide", "codex", "journal"));
 		
