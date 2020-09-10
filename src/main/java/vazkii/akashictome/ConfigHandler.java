@@ -25,9 +25,8 @@ public class ConfigHandler {
 	public ConfigHandler(ForgeConfigSpec.Builder builder) {
 		allItems = builder.define("Allow all items to be added", false);
 		
-		whitelistedItems = builder.define("Whitelisted Items",
-				Arrays.asList("Whitelisted Items", 
-						"roots:runedtablet", 
+		whitelistedItems = builder.defineList("Whitelisted Items",
+				Arrays.asList("roots:runedtablet",
 						"opencomputers:tool:4", 
 						"immersiveengineering:tool:3", 
 						"integrateddynamics:on_the_dynamics_of_integration", 
