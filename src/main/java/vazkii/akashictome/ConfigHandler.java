@@ -3,6 +3,7 @@ package vazkii.akashictome;
 import java.util.Arrays;
 import java.util.List;
 
+import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import org.apache.commons.lang3.tuple.Pair;
 
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -10,8 +11,10 @@ import net.minecraftforge.common.ForgeConfigSpec;
 public class ConfigHandler {
 
 	public static ForgeConfigSpec.BooleanValue allItems;
-	public static ForgeConfigSpec.ConfigValue<List<String>> whitelistedItems, whitelistedNames, blacklistedMods;
-	public static ForgeConfigSpec.ConfigValue<List<String>> aliasesList;
+	public static ConfigValue<List<? extends String>> whitelistedItems;
+	public static ForgeConfigSpec.ConfigValue<List<? extends String>> whitelistedNames;
+	public static ForgeConfigSpec.ConfigValue<List<? extends String>> blacklistedMods;
+	public static ForgeConfigSpec.ConfigValue<List<? extends String>> aliasesList;
 	
 	static final ConfigHandler CONFIG;
 	static final ForgeConfigSpec CONFIG_SPEC;
@@ -33,13 +36,28 @@ public class ConfigHandler {
 						"theoneprobe:probenote",
 						"evilcraft:origins_of_darkness",
 						"draconicevolution:info_tablet",
-						"charset:tablet"));
+						"charset:tablet"),
+				s -> s instanceof String);
 		
-		whitelistedNames = builder.define("Whitelisted Names", Arrays.asList("book", "tome", "lexicon", "nomicon", "manual", "knowledge", "pedia", "compendium", "guide", "codex", "journal"));
+		whitelistedNames = builder.defineList("Whitelisted Names",
+				Arrays.asList("book",
+						"tome",
+						"lexicon",
+						"nomicon",
+						"manual",
+						"knowledge",
+						"pedia",
+						"compendium",
+						"guide",
+						"codex",
+						"journal"),
+				s -> s instanceof String);
 		
-		blacklistedMods = builder.define("Blacklisted Mods", Arrays.asList());
+		blacklistedMods = builder.defineList("Blacklisted Mods",
+				Arrays.asList(),
+				s -> s instanceof String);
 
-		aliasesList = builder.define("Mod Aliases",
+		aliasesList = builder.defineList("Mod Aliases",
 				Arrays.asList("nautralpledge=botania",
 				"thermalexpansion=thermalfoundation",
 				"thermaldynamics=thermalfoundation",
@@ -57,7 +75,8 @@ public class ConfigHandler {
 				"xnet=rftools",
 				"buildcrafttransport=buildcraft",
 				"buildcraftfactory=buildcraft",
-				"buildcraftsilicon=buildcraft"));
+				"buildcraftsilicon=buildcraft"),
+				s -> s instanceof String);
 
 	}
 }
