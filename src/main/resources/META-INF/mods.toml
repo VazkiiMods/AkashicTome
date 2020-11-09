@@ -1,6 +1,7 @@
 modLoader="javafml"
 loaderVersion="[30,)"
 issueTrackerURL="https://github.com/Vazkii/AkashicTome"
+license="Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License"
 
 [[mods]]
 modId="akashictome"
