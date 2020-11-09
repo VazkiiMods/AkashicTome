@@ -8,13 +8,13 @@
 </listAttribute>
 <mapAttribute key="org.eclipse.debug.core.environmentVariables">
 <mapEntry key="FORGE_GROUP" value="net.minecraftforge"/>
-<mapEntry key="FORGE_VERSION" value="31.1.24"/>
-<mapEntry key="MCP_MAPPINGS" value="snapshot_20200225-1.15.1"/>
+<mapEntry key="FORGE_VERSION" value="34.1.42"/>
+<mapEntry key="MCP_MAPPINGS" value="snapshot_20201028-1.16.3"/>
 <mapEntry key="MCP_VERSION" value="20200307.202953"/>
-<mapEntry key="MC_VERSION" value="1.15.2"/>
+<mapEntry key="MC_VERSION" value="1.16.3"/>
 <mapEntry key="MOD_CLASSES" value="examplemod%%D:\MCPDev\AkashicTome\bin\main;examplemod%%D:\MCPDev\AkashicTome\bin\main"/>
 <mapEntry key="assetDirectory" value="C:\Users\VL\.gradle\caches\forge_gradle\assets"/>
-<mapEntry key="assetIndex" value="1.15"/>
+<mapEntry key="assetIndex" value="1.16"/>
 <mapEntry key="nativesDirectory" value="D:\MCPDev\AkashicTome\build\natives"/>
 <mapEntry key="target" value="fmluserdevclient"/>
 </mapAttribute>
