@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[35,)"
+loaderVersion="[34,)"
 issueTrackerURL="https://github.com/Vazkii/AkashicTome"
 license="Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License"
 
@@ -21,6 +21,6 @@ The book to end all books.
 [[dependencies.akashictome]]
     modId="forge"
     mandatory=true
-    versionRange="[35.0.7,)"
+    versionRange="[34.1.0,)"
     ordering="AFTER"
     side="BOTH"
