@@ -86,7 +86,7 @@ public class AttachementRecipe extends SpecialRecipe {
 
 		String mod = MorphingHandler.getModFromStack(stack);
 		if(mod.equals(MorphingHandler.MINECRAFT))
-			return true;
+			return false;
 
 		if(ConfigHandler.allItems.get())
 			return true;
