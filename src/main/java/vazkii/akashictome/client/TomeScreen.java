@@ -31,6 +31,7 @@ import net.minecraft.util.math.vector.Vector3f;
 import vazkii.akashictome.AkashicTome;
 import vazkii.akashictome.MorphingHandler;
 import vazkii.akashictome.network.MessageMorphTome;
+import vazkii.arl.util.DropInHandler;
 import vazkii.arl.util.ItemNBTHelper;
 
 public class TomeScreen extends Screen {
@@ -48,9 +49,9 @@ public class TomeScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
-		if(p_mouseClicked_5_ == 0 && definedMod != null) {
-			AkashicTome.sendToServer(new MessageMorphTome(definedMod));
-			minecraft.displayGuiScreen(null);
+		if(p_mouseClicked_5_ == 0 && this.definedMod != null) {
+			AkashicTome.sendToServer(new MessageMorphTome(this.definedMod));
+			this.minecraft.displayGuiScreen(null);
 			return true;
 		}
 
@@ -59,13 +60,13 @@ public class TomeScreen extends Screen {
 
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		definedMod = null;
+		this.definedMod = null;
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 
 		List<ItemStack> stacks = new ArrayList<>();
 
-		if(tome.hasTag()) {
-			CompoundNBT data = tome.getTag().getCompound(MorphingHandler.TAG_TOME_DATA);
+		if(this.tome.hasTag()) {
+			CompoundNBT data = this.tome.getTag().getCompound(MorphingHandler.TAG_TOME_DATA);
 			List<String> keys = Lists.newArrayList(data.keySet());
 			Collections.sort(keys);
 
@@ -78,7 +79,7 @@ public class TomeScreen extends Screen {
 			}
 		}
 
-		MainWindow window = minecraft.getMainWindow();
+		MainWindow window = this.minecraft.getMainWindow();
 		int centerX = window.getScaledWidth() / 2;
 		int centerY = window.getScaledHeight() / 2;
 
@@ -108,7 +109,7 @@ public class TomeScreen extends Screen {
 					y -= 2;
 				}
 
-				minecraft.getItemRenderer().renderItemAndEffectIntoGUI(stack, x, y);
+				this.minecraft.getItemRenderer().renderItemAndEffectIntoGUI(stack, x, y);
 			}
 			RenderHelper.disableStandardItemLighting();
 		}
@@ -128,7 +129,7 @@ public class TomeScreen extends Screen {
 		MatrixStack.Entry matrixstack$entry = matrixStack.getLast();
 		matrixstack$entry.getMatrix().setIdentity();
 		matrixstack$entry.getNormal().setIdentity();
-		matrixStack.translate(0.0D, (double)3.3F, 1984.0D);
+		matrixStack.translate(0.0D, 3.3F, 1984.0D);
 		float scale = 20F;
 		matrixStack.scale(scale, scale, scale);
 		matrixStack.rotate(Vector3f.ZP.rotationDegrees(180.0F));
@@ -136,7 +137,6 @@ public class TomeScreen extends Screen {
 		matrixStack.rotate(Vector3f.YP.rotationDegrees(4F * 90F - 90F));
 
 		RenderSystem.enableRescaleNormal();
-		//BOOK_MODEL.func_228247_a_(0.0F, 1F, 0F, 1F);
 		BOOK_MODEL.setBookState(0.0F, 1F, 0F, 1F);
 		IRenderTypeBuffer.Impl irendertypebuffer$impl = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
 		IVertexBuilder ivertexbuilder = irendertypebuffer$impl.getBuffer(BOOK_MODEL.getRenderType(BOOK_TEXTURE));
@@ -158,15 +158,10 @@ public class TomeScreen extends Screen {
 			
 			String trueName = ITextComponent.Serializer.getComponentFromJson(name).getString();
 			//vazkii.arl.util.RenderHelper.renderTooltip(mouseX, mouseY, Arrays.asList(new String[] { trueName, mod }));
-			List<StringTextComponent> tooltipList = Arrays.asList(new String[] {trueName, mod})
-													.stream()
-													.map(s -> {
-														StringTextComponent stringTextComponent = new StringTextComponent(s);
-														return stringTextComponent;
-															})
-													.collect(Collectors.toList());
-			GuiUtils.drawHoveringText(matrixStack, tooltipList, mouseX, mouseY, width, height, -1, this.font);
-			definedMod = tempDefinedMod;
+			List<StringTextComponent> tooltipList = Arrays.stream(new String[] {trueName, mod}).map(StringTextComponent::new).collect(Collectors.toList());
+
+			GuiUtils.drawHoveringText(matrixStack, tooltipList, mouseX, mouseY, this.width, this.height, -1, this.font);
+			this.definedMod = tempDefinedMod;
 		}
 	}
 

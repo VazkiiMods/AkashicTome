@@ -28,10 +28,10 @@ public class MessageMorphTome implements IMessage {
         		ItemStack tomeStack = player.getHeldItemMainhand();
         		Hand hand = Hand.MAIN_HAND;
         		
-        		boolean hasTome = tomeStack != null && tomeStack.getItem() == ModItems.tome;
+        		boolean hasTome = !tomeStack.isEmpty() && tomeStack.getItem() == ModItems.tome;
         		if(!hasTome) {
         			tomeStack = player.getHeldItemOffhand();
-        			hasTome = tomeStack != null && tomeStack.getItem() == ModItems.tome;
+        			hasTome = !tomeStack.isEmpty() && tomeStack.getItem() == ModItems.tome;
         			hand = Hand.OFF_HAND;
         		}
         		
