@@ -18,10 +18,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.*;
 import net.minecraft.world.World;
 import vazkii.arl.item.BasicItem;
 import vazkii.arl.util.TooltipHandler;
@@ -86,7 +83,9 @@ public class TomeItem extends BasicItem {
 						String mod = MorphingHandler.getModFromStack(modStack);
 
 						if(!currMod.equals(mod)) 
-							tooltip.add(new StringTextComponent(MorphingHandler.getModNameForId(mod)).setStyle(new Style().setColor(TextFormatting.AQUA)));
+							tooltip.add(new StringTextComponent(MorphingHandler.getModNameForId(mod)).setStyle(Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.AQUA))));
+
+
 						tooltip.add(new StringTextComponent(" \u2520 " + name));
 
 						currMod = mod;

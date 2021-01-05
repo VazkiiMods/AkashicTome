@@ -8,10 +8,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.*;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -69,7 +66,7 @@ public final class MorphingHandler {
 			copyCmp.remove("display");
 			String displayName = copyCmp.getString(TAG_TOME_DISPLAY_NAME);
 			if(!displayName.isEmpty() && !displayName.equals(copy.getDisplayName()))
-				copy.setDisplayName(ITextComponent.Serializer.fromJson(displayName));
+				copy.setDisplayName(ITextComponent.Serializer.getComponentFromJson(displayName));
 
 			copyCmp.remove(TAG_MORPHING);
 			copyCmp.remove(TAG_TOME_DISPLAY_NAME);
@@ -156,7 +153,7 @@ public final class MorphingHandler {
 				displayName = stackCmp.getString(TAG_TOME_DISPLAY_NAME);
 			else stackCmp.putString(TAG_TOME_DISPLAY_NAME, displayName);
 
-			ITextComponent stackName = ITextComponent.Serializer.fromJson(displayName).setStyle(new Style().setColor(TextFormatting.GREEN));
+			ITextComponent stackName = ITextComponent.Serializer.getComponentFromJson(displayName).setStyle(Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.GREEN)));
 			ITextComponent comp = new TranslationTextComponent("akashictome.sudo_name", stackName);
 			stack.setDisplayName(comp);
 		}

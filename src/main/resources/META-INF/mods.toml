@@ -1,6 +1,7 @@
 modLoader="javafml"
 loaderVersion="[30,)"
 issueTrackerURL="https://github.com/Vazkii/AkashicTome"
+license="https://github.com/Vazkii/AutoRegLib/blob/master/README.md"
 
 [[mods]]
 modId="akashictome"
