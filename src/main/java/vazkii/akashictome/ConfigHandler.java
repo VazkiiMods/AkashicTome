@@ -36,7 +36,8 @@ public class ConfigHandler {
 						"evilcraft:origins_of_darkness",
 						"draconicevolution:info_tablet",
 						"charset:tablet",
-						"antiqueatlas:antique_atlas"), Predicates.alwaysTrue());
+						"antiqueatlas:antique_atlas",
+            "occultism:dictionary_of_spirits"), Predicates.alwaysTrue());
 
 		whitelistedNames = builder.defineList("Whitelisted Names",
 				Lists.newArrayList("book", 
