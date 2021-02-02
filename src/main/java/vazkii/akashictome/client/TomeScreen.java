@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import net.minecraft.util.text.*;
+import net.minecraftforge.fml.client.gui.GuiUtils;
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.Lists;
@@ -15,22 +18,20 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.model.BookModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3f;
 import vazkii.akashictome.AkashicTome;
 import vazkii.akashictome.MorphingHandler;
 import vazkii.akashictome.network.MessageMorphTome;
+import vazkii.arl.util.DropInHandler;
 import vazkii.arl.util.ItemNBTHelper;
 
 public class TomeScreen extends Screen {
@@ -48,9 +49,9 @@ public class TomeScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
-		if(p_mouseClicked_5_ == 0 && definedMod != null) {
-			AkashicTome.sendToServer(new MessageMorphTome(definedMod));
-			minecraft.displayGuiScreen(null);
+		if(p_mouseClicked_5_ == 0 && this.definedMod != null) {
+			AkashicTome.sendToServer(new MessageMorphTome(this.definedMod));
+			this.minecraft.displayGuiScreen(null);
 			return true;
 		}
 
@@ -58,14 +59,14 @@ public class TomeScreen extends Screen {
 	}
 
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks) {
-		definedMod = null;
-		super.render(mouseX, mouseY, partialTicks);
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		this.definedMod = null;
+		super.render(matrixStack, mouseX, mouseY, partialTicks);
 
 		List<ItemStack> stacks = new ArrayList<>();
 
-		if(tome.hasTag()) {
-			CompoundNBT data = tome.getTag().getCompound(MorphingHandler.TAG_TOME_DATA);
+		if(this.tome.hasTag()) {
+			CompoundNBT data = this.tome.getTag().getCompound(MorphingHandler.TAG_TOME_DATA);
 			List<String> keys = Lists.newArrayList(data.keySet());
 			Collections.sort(keys);
 
@@ -78,7 +79,7 @@ public class TomeScreen extends Screen {
 			}
 		}
 
-		MainWindow window = minecraft.getMainWindow();
+		MainWindow window = this.minecraft.getMainWindow();
 		int centerX = window.getScaledWidth() / 2;
 		int centerY = window.getScaledHeight() / 2;
 
@@ -91,8 +92,8 @@ public class TomeScreen extends Screen {
 
 		int padding = 4;
 		int extra = 2;
-		fill(startX - padding, startY - padding, startX + iconSize * amountPerRow + padding, startY + iconSize * rows + padding, 0x22000000);
-		fill(startX - padding - extra, startY - padding - extra, startX + iconSize * amountPerRow + padding + extra, startY + iconSize * rows + padding + extra, 0x22000000);
+		fill(matrixStack, startX - padding, startY - padding, startX + iconSize * amountPerRow + padding, startY + iconSize * rows + padding, 0x22000000);
+		fill(matrixStack, startX - padding - extra, startY - padding - extra, startX + iconSize * amountPerRow + padding + extra, startY + iconSize * rows + padding + extra, 0x22000000);
 
 		ItemStack tooltipStack = ItemStack.EMPTY;
 
@@ -108,7 +109,7 @@ public class TomeScreen extends Screen {
 					y -= 2;
 				}
 
-				minecraft.getItemRenderer().renderItemAndEffectIntoGUI(stack, x, y);
+				this.minecraft.getItemRenderer().renderItemAndEffectIntoGUI(stack, x, y);
 			}
 			RenderHelper.disableStandardItemLighting();
 		}
@@ -123,25 +124,25 @@ public class TomeScreen extends Screen {
 		RenderSystem.multMatrix(Matrix4f.perspective(90.0D, 1.3333334F, 9.0F, 80.0F));
 		RenderSystem.matrixMode(GL11.GL_MODELVIEW);
 
-		MatrixStack matrixstack = new MatrixStack();
-		matrixstack.push();
-		MatrixStack.Entry matrixstack$entry = matrixstack.getLast();
+		//MatrixStack matrixstack = new MatrixStack();
+		matrixStack.push();
+		MatrixStack.Entry matrixstack$entry = matrixStack.getLast();
 		matrixstack$entry.getMatrix().setIdentity();
 		matrixstack$entry.getNormal().setIdentity();
-		matrixstack.translate(0.0D, (double)3.3F, 1984.0D);
+		matrixStack.translate(0.0D, 3.3F, 1984.0D);
 		float scale = 20F;
-		matrixstack.scale(scale, scale, scale);
-		matrixstack.rotate(Vector3f.ZP.rotationDegrees(180.0F));
-		matrixstack.rotate(Vector3f.XP.rotationDegrees(50.0F));
-		matrixstack.rotate(Vector3f.YP.rotationDegrees(4F * 90F - 90F));
+		matrixStack.scale(scale, scale, scale);
+		matrixStack.rotate(Vector3f.ZP.rotationDegrees(180.0F));
+		matrixStack.rotate(Vector3f.XP.rotationDegrees(50.0F));
+		matrixStack.rotate(Vector3f.YP.rotationDegrees(4F * 90F - 90F));
 
 		RenderSystem.enableRescaleNormal();
-		BOOK_MODEL.func_228247_a_(0.0F, 1F, 0F, 1F);
+		BOOK_MODEL.setBookState(0.0F, 1F, 0F, 1F);
 		IRenderTypeBuffer.Impl irendertypebuffer$impl = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
 		IVertexBuilder ivertexbuilder = irendertypebuffer$impl.getBuffer(BOOK_MODEL.getRenderType(BOOK_TEXTURE));
-		BOOK_MODEL.render(matrixstack, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		BOOK_MODEL.render(matrixStack, ivertexbuilder, 15728880, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 		irendertypebuffer$impl.finish();
-		matrixstack.pop();
+		matrixStack.pop();
 		RenderSystem.matrixMode(5889);
 		RenderSystem.viewport(0, 0, this.minecraft.getMainWindow().getFramebufferWidth(), this.minecraft.getMainWindow().getFramebufferHeight());
 		RenderSystem.popMatrix();
@@ -155,10 +156,12 @@ public class TomeScreen extends Screen {
 			String mod = TextFormatting.GRAY + MorphingHandler.getModNameForId(tempDefinedMod);
 			tempDefinedMod = ItemNBTHelper.getString(tooltipStack, MorphingHandler.TAG_ITEM_DEFINED_MOD, tempDefinedMod);
 			
-			String trueName = ITextComponent.Serializer.fromJson(name).getString();
-			vazkii.arl.util.RenderHelper.renderTooltip(mouseX, mouseY, Arrays.asList(new String[] { trueName, mod }));
+			String trueName = ITextComponent.Serializer.getComponentFromJson(name).getString();
+			//vazkii.arl.util.RenderHelper.renderTooltip(mouseX, mouseY, Arrays.asList(new String[] { trueName, mod }));
+			List<StringTextComponent> tooltipList = Arrays.stream(new String[] {trueName, mod}).map(StringTextComponent::new).collect(Collectors.toList());
 
-			definedMod = tempDefinedMod;
+			GuiUtils.drawHoveringText(matrixStack, tooltipList, mouseX, mouseY, this.width, this.height, -1, this.font);
+			this.definedMod = tempDefinedMod;
 		}
 	}
 

@@ -1,18 +1,20 @@
 package vazkii.akashictome;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ConfigHandler {
 
 	public static ForgeConfigSpec.BooleanValue allItems;
-	public static ForgeConfigSpec.ConfigValue<List<String>> whitelistedItems, whitelistedNames, blacklistedMods;
-	public static ForgeConfigSpec.ConfigValue<List<String>> aliasesList;
-	
+	public static ForgeConfigSpec.ConfigValue<List<? extends String>> whitelistedItems, whitelistedNames, blacklistedMods;
+	public static ForgeConfigSpec.ConfigValue<List<? extends String>> aliasesList;
+
 	static final ConfigHandler CONFIG;
 	static final ForgeConfigSpec CONFIG_SPEC;
 
@@ -24,10 +26,9 @@ public class ConfigHandler {
 
 	public ConfigHandler(ForgeConfigSpec.Builder builder) {
 		allItems = builder.define("Allow all items to be added", false);
-		
-		whitelistedItems = builder.define("Whitelisted Items",
-				Arrays.asList("Whitelisted Items", 
-						"roots:runedtablet", 
+
+		whitelistedItems = builder.defineList("Whitelisted Items",
+				Lists.newArrayList("roots:runedtablet", 
 						"opencomputers:tool:4", 
 						"immersiveengineering:tool:3", 
 						"integrateddynamics:on_the_dynamics_of_integration", 
@@ -35,31 +36,42 @@ public class ConfigHandler {
 						"evilcraft:origins_of_darkness",
 						"draconicevolution:info_tablet",
 						"charset:tablet",
-						"antiqueatlas:antique_atlas"));
-		
-		whitelistedNames = builder.define("Whitelisted Names", Arrays.asList("book", "tome", "lexicon", "nomicon", "manual", "knowledge", "pedia", "compendium", "guide", "codex", "journal"));
-		
-		blacklistedMods = builder.define("Blacklisted Mods", Arrays.asList());
+						"antiqueatlas:antique_atlas"), Predicates.alwaysTrue());
 
-		aliasesList = builder.define("Mod Aliases",
-				Arrays.asList("nautralpledge=botania",
-				"thermalexpansion=thermalfoundation",
-				"thermaldynamics=thermalfoundation",
-				"thermalcultivation=thermalfoundation", 
-				"redstonearsenal=thermalfoundation",
-				"rftoolsdim=rftools",
-				"rftoolspower=rftools",
-				"rftoolscontrol=rftools",
-				"ae2stuff=appliedenergistics2",
-				"animus=bloodmagic",
-				"integrateddynamics=integratedtunnels",
-				"mekanismgenerators=mekanism",
-				"mekanismtools=mekanism",
-				"deepresonance=rftools",
-				"xnet=rftools",
-				"buildcrafttransport=buildcraft",
-				"buildcraftfactory=buildcraft",
-				"buildcraftsilicon=buildcraft"));
+		whitelistedNames = builder.defineList("Whitelisted Names",
+				Lists.newArrayList("book", 
+						"tome", 
+						"lexicon", 
+						"nomicon", 
+						"manual", 
+						"knowledge", 
+						"pedia", 
+						"compendium", 
+						"guide", 
+						"codex", 
+						"journal"), Predicates.alwaysTrue());
+
+		blacklistedMods = builder.defineList("Blacklisted Mods", Lists.newArrayList(), Predicates.alwaysTrue());
+    
+		aliasesList = builder.defineList("Mod Aliases",
+				Lists.newArrayList("nautralpledge=botania",
+						"thermalexpansion=thermalfoundation",
+						"thermaldynamics=thermalfoundation",
+						"thermalcultivation=thermalfoundation", 
+						"redstonearsenal=thermalfoundation",
+						"rftoolsdim=rftools",
+						"rftoolspower=rftools",
+						"rftoolscontrol=rftools",
+						"ae2stuff=appliedenergistics2",
+						"animus=bloodmagic",
+						"integrateddynamics=integratedtunnels",
+						"mekanismgenerators=mekanism",
+						"mekanismtools=mekanism",
+						"deepresonance=rftools",
+						"xnet=rftools",
+						"buildcrafttransport=buildcraft",
+						"buildcraftfactory=buildcraft",
+						"buildcraftsilicon=buildcraft"), Predicates.alwaysTrue());
 
 	}
 }
