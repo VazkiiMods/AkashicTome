@@ -35,7 +35,8 @@ public class ConfigHandler {
 						"theoneprobe:probenote",
 						"evilcraft:origins_of_darkness",
 						"draconicevolution:info_tablet",
-						"charset:tablet"), Predicates.alwaysTrue());
+						"charset:tablet",
+						"antiqueatlas:antique_atlas"), Predicates.alwaysTrue());
 
 		whitelistedNames = builder.defineList("Whitelisted Names",
 				Lists.newArrayList("book", 
@@ -51,7 +52,7 @@ public class ConfigHandler {
 						"journal"), Predicates.alwaysTrue());
 
 		blacklistedMods = builder.defineList("Blacklisted Mods", Lists.newArrayList(), Predicates.alwaysTrue());
-
+    
 		aliasesList = builder.defineList("Mod Aliases",
 				Lists.newArrayList("nautralpledge=botania",
 						"thermalexpansion=thermalfoundation",
