@@ -151,12 +151,12 @@ public class TomeScreen extends Screen {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
 		if(!tooltipStack.isEmpty()) {
-			String name = ItemNBTHelper.getString(tooltipStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, ITextComponent.Serializer.toJson(tooltipStack.getDisplayName()));
+			CompoundNBT name = ItemNBTHelper.getCompound(tooltipStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, false);
 			String tempDefinedMod  = MorphingHandler.getModFromStack(tooltipStack);
 			String mod = TextFormatting.GRAY + MorphingHandler.getModNameForId(tempDefinedMod);
 			tempDefinedMod = ItemNBTHelper.getString(tooltipStack, MorphingHandler.TAG_ITEM_DEFINED_MOD, tempDefinedMod);
 			
-			String trueName = ITextComponent.Serializer.getComponentFromJson(name).getString();
+			String trueName = name.getString("text");
 			//vazkii.arl.util.RenderHelper.renderTooltip(mouseX, mouseY, Arrays.asList(new String[] { trueName, mod }));
 			List<StringTextComponent> tooltipList = Arrays.stream(new String[] {trueName, mod}).map(StringTextComponent::new).collect(Collectors.toList());
 

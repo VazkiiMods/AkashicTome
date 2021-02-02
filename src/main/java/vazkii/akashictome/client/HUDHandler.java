@@ -1,5 +1,6 @@
 package vazkii.akashictome.client;
 
+import net.minecraft.nbt.CompoundNBT;
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -58,7 +59,7 @@ public class HUDHandler {
 				ItemStack morphStack = MorphingHandler.getShiftStackForMod(tomeStack, mod);
 				if(!morphStack.isEmpty() && !ItemStack.areItemsEqual(morphStack, tomeStack)) {
 					drawStack = morphStack;
-					line1 = ItemNBTHelper.getString(morphStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, "N/A");
+					line1 = ItemNBTHelper.getCompound(morphStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, false).getString("text");
 					line2 = TextFormatting.GRAY + I18n.format("akashictome.click_morph");
 				}
 				
