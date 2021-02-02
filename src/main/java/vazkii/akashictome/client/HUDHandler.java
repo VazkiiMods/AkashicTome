@@ -70,8 +70,8 @@ public class HUDHandler {
 
 					mc.getItemRenderer().renderItemIntoGUI(drawStack, sx, sy);
 					RenderSystem.disableLighting();
-					mc.fontRenderer.drawStringWithShadow(line1, sx + 20, sy + 4, 0xFFFFFFFF);
-					mc.fontRenderer.drawStringWithShadow(line2, sx + 25, sy + 14, 0xFFFFFFFF);
+					mc.fontRenderer.drawStringWithShadow(event.getMatrixStack(), line1, sx + 20, sy + 4, 0xFFFFFFFF);
+					mc.fontRenderer.drawStringWithShadow(event.getMatrixStack(), line2, sx + 25, sy + 14, 0xFFFFFFFF);
 					RenderSystem.color4f(1F, 1F, 1F, 1F);
 				}
 			}

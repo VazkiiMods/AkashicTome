@@ -20,7 +20,7 @@ public class MessageUnmorphTome implements IMessage {
 		if(player != null) {		
 			context.enqueueWork(() -> {
 				ItemStack stack = player.getHeldItemMainhand();
-				if(stack != null && MorphingHandler.isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
+				if(!stack.isEmpty() && MorphingHandler.isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
 					ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, MorphingHandler.MINECRAFT);
 					player.inventory.setInventorySlotContents(player.inventory.currentItem, newStack);
 					AkashicTome.proxy.updateEquippedItem();
