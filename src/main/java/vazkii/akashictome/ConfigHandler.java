@@ -1,6 +1,7 @@
 package vazkii.akashictome;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -27,6 +28,8 @@ public class ConfigHandler {
 	public ConfigHandler(ForgeConfigSpec.Builder builder) {
 		allItems = builder.define("Allow all items to be added", false);
 
+		Predicate<Object> validator = o -> o instanceof String;
+
 		whitelistedItems = builder.defineList("Whitelisted Items",
 				Lists.newArrayList("roots:runedtablet", 
 						"opencomputers:tool:4", 
@@ -37,7 +40,7 @@ public class ConfigHandler {
 						"draconicevolution:info_tablet",
 						"charset:tablet",
 						"antiqueatlas:antique_atlas",
-            "occultism:dictionary_of_spirits"), Predicates.alwaysTrue());
+						"occultism:dictionary_of_spirits"), validator);
 
 		whitelistedNames = builder.defineList("Whitelisted Names",
 				Lists.newArrayList("book", 
@@ -50,10 +53,10 @@ public class ConfigHandler {
 						"compendium", 
 						"guide", 
 						"codex", 
-						"journal"), Predicates.alwaysTrue());
+						"journal"), validator);
 
-		blacklistedMods = builder.defineList("Blacklisted Mods", Lists.newArrayList(), Predicates.alwaysTrue());
-    
+		blacklistedMods = builder.defineList("Blacklisted Mods", Lists.newArrayList(), validator);
+
 		aliasesList = builder.defineList("Mod Aliases",
 				Lists.newArrayList("nautralpledge=botania",
 						"thermalexpansion=thermalfoundation",
@@ -72,7 +75,7 @@ public class ConfigHandler {
 						"xnet=rftools",
 						"buildcrafttransport=buildcraft",
 						"buildcraftfactory=buildcraft",
-						"buildcraftsilicon=buildcraft"), Predicates.alwaysTrue());
+						"buildcraftsilicon=buildcraft"), validator);
 
 	}
 }
