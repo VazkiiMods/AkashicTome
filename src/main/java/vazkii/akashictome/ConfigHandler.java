@@ -40,6 +40,7 @@ public class ConfigHandler {
 						"draconicevolution:info_tablet",
 						"charset:tablet",
 						"antiqueatlas:antique_atlas",
+						"theurgy:grimiore",
 						"occultism:dictionary_of_spirits"), validator);
 
 		whitelistedNames = builder.defineList("Whitelisted Names",
