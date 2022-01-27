@@ -8,86 +8,88 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.level.Level;
 import vazkii.arl.item.BasicItem;
 import vazkii.arl.util.TooltipHandler;
+
+import net.minecraft.world.item.Item.Properties;
 
 public class TomeItem extends BasicItem {
 
 	public TomeItem() {
-		super("tome", new Properties().maxStackSize(1).group(ItemGroup.TOOLS));
+		super("tome", new Properties().stacksTo(1).tab(CreativeModeTab.TAB_TOOLS));
 	}
 
 	@Override
-	public ActionResultType onItemUse(ItemUseContext context) {
-		PlayerEntity playerIn = context.getPlayer();
-		Hand hand = context.getHand();
-		World worldIn = context.getWorld();
-		BlockPos pos = context.getPos();
-		ItemStack stack = playerIn.getHeldItem(hand);
+	public InteractionResult useOn(UseOnContext context) {
+		Player playerIn = context.getPlayer();
+		InteractionHand hand = context.getHand();
+		Level worldIn = context.getLevel();
+		BlockPos pos = context.getClickedPos();
+		ItemStack stack = playerIn.getItemInHand(hand);
 		
 		if(playerIn.isDiscrete()) {
 			String mod = MorphingHandler.getModFromState(worldIn.getBlockState(pos)); 
 			ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, mod);
-			if(!ItemStack.areItemsEqual(newStack, stack)) {
-				playerIn.setHeldItem(hand, newStack);
-				return ActionResultType.SUCCESS;
+			if(!ItemStack.isSame(newStack, stack)) {
+				playerIn.setItemInHand(hand, newStack);
+				return InteractionResult.SUCCESS;
 			}
 		}
 
-		return ActionResultType.PASS;
+		return InteractionResult.PASS;
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-		ItemStack stack = playerIn.getHeldItem(handIn);
+	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+		ItemStack stack = playerIn.getItemInHand(handIn);
 		AkashicTome.proxy.openTomeGUI(playerIn, stack);
-		return new ActionResult<ItemStack>(ActionResultType.SUCCESS, stack);
+		return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, stack);
 	}
 
 	@Override
-	public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag advanced) {
+	public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag advanced) {
 		if(!stack.hasTag() || !stack.getTag().contains(MorphingHandler.TAG_TOME_DATA))
 			return;
 
-		CompoundNBT data = stack.getTag().getCompound(MorphingHandler.TAG_TOME_DATA);
-		if(data.keySet().size() == 0)
+		CompoundTag data = stack.getTag().getCompound(MorphingHandler.TAG_TOME_DATA);
+		if(data.getAllKeys().size() == 0)
 			return;
 
 		List<String> tooltipList = new ArrayList<>();
 
 		TooltipHandler.tooltipIfShift(tooltipList, () -> {
-			List<String> keys = Lists.newArrayList(data.keySet());
+			List<String> keys = Lists.newArrayList(data.getAllKeys());
 			Collections.sort(keys);
 			String currMod = "";
 
 			for(String s : keys) {
-				CompoundNBT cmp = data.getCompound(s);
+				CompoundTag cmp = data.getCompound(s);
 				if(cmp != null) {
-					ItemStack modStack = ItemStack.read(cmp);
+					ItemStack modStack = ItemStack.of(cmp);
 					if(!modStack.isEmpty()) {
-						String name = modStack.getDisplayName().getString();
+						String name = modStack.getHoverName().getString();
 						if(modStack.hasTag() && modStack.getTag().contains(MorphingHandler.TAG_TOME_DISPLAY_NAME))
-							name = ((CompoundNBT) modStack.getTag().get(MorphingHandler.TAG_TOME_DISPLAY_NAME)).getString("text");
+							name = ((CompoundTag) modStack.getTag().get(MorphingHandler.TAG_TOME_DISPLAY_NAME)).getString("text");
 						String mod = MorphingHandler.getModFromStack(modStack);
 
 						if(!currMod.equals(mod)) 
-							tooltip.add(new StringTextComponent(MorphingHandler.getModNameForId(mod)).setStyle(Style.EMPTY.createStyleFromFormattings(TextFormatting.AQUA)));
-						tooltip.add(new StringTextComponent(" \u2520 " + name));
+							tooltip.add(new TextComponent(MorphingHandler.getModNameForId(mod)).setStyle(Style.EMPTY.applyFormats(ChatFormatting.AQUA)));
+						tooltip.add(new TextComponent(" \u2520 " + name));
 
 						currMod = mod;
 					}
@@ -96,7 +98,7 @@ public class TomeItem extends BasicItem {
 		}
 		);
 		
-		tooltipList.forEach(tip -> tooltip.add(new StringTextComponent(tip)));
+		tooltipList.forEach(tip -> tooltip.add(new TextComponent(tip)));
 	}
 
 }

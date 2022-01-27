@@ -4,18 +4,23 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.forgespi.language.IModInfo;
 import vazkii.akashictome.network.MessageUnmorphTome;
 import vazkii.arl.util.ItemNBTHelper;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public final class MorphingHandler {
 
@@ -44,32 +49,32 @@ public final class MorphingHandler {
 		ItemEntity e = event.getEntityItem();
 		ItemStack stack = e.getItem();
 		if(!stack.isEmpty() && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
-			CompoundNBT morphData = (CompoundNBT) stack.getTag().getCompound(TAG_TOME_DATA).copy();
+			CompoundTag morphData = stack.getTag().getCompound(TAG_TOME_DATA).copy();
 			String currentMod = ItemNBTHelper.getString(stack, TAG_ITEM_DEFINED_MOD, getModFromStack(stack));
 
 			ItemStack morph = makeMorphedStack(stack, MINECRAFT, morphData);
-			CompoundNBT newMorphData = morph.getTag().getCompound(TAG_TOME_DATA);
+			CompoundTag newMorphData = morph.getTag().getCompound(TAG_TOME_DATA);
 			newMorphData.remove(currentMod);
 
-			if(!e.getEntityWorld().isRemote) {
-				ItemEntity newItem = new ItemEntity(e.getEntityWorld(), e.getPosX(), e.getPosY(), e.getPosZ(), morph);
-				e.getEntityWorld().addEntity(newItem);
+			if(!e.getCommandSenderWorld().isClientSide) {
+				ItemEntity newItem = new ItemEntity(e.getCommandSenderWorld(), e.getX(), e.getY(), e.getZ(), morph);
+				e.getCommandSenderWorld().addFreshEntity(newItem);
 			}
 
 			ItemStack copy = stack.copy();
-			CompoundNBT copyCmp = copy.getTag();
+			CompoundTag copyCmp = copy.getTag();
 			if(copyCmp == null) {
-				copyCmp = new CompoundNBT();
+				copyCmp = new CompoundTag();
 				copy.setTag(copyCmp);
 			}
 
 			copyCmp.remove("display");
-			ITextComponent displayName = null;
-			CompoundNBT nameCmp = (CompoundNBT) copyCmp.get(TAG_TOME_DISPLAY_NAME);
+			Component displayName = null;
+			CompoundTag nameCmp = (CompoundTag) copyCmp.get(TAG_TOME_DISPLAY_NAME);
 			if (nameCmp != null)
-				displayName = new StringTextComponent(nameCmp.getString("text"));
-			if(displayName != null && !displayName.getString().isEmpty() && displayName != copy.getDisplayName())
-				copy.setDisplayName(displayName);
+				displayName = new TextComponent(nameCmp.getString("text"));
+			if(displayName != null && !displayName.getString().isEmpty() && displayName != copy.getHoverName())
+				copy.setHoverName(displayName);
 
 			copyCmp.remove(TAG_MORPHING);
 			copyCmp.remove(TAG_TOME_DISPLAY_NAME);
@@ -103,7 +108,7 @@ public final class MorphingHandler {
 		if(!stack.hasTag())
 			return false;
 		
-		CompoundNBT morphData = stack.getTag().getCompound(TAG_TOME_DATA);
+		CompoundTag morphData = stack.getTag().getCompound(TAG_TOME_DATA);
 		return morphData.contains(mod);
 	}
 
@@ -115,15 +120,15 @@ public final class MorphingHandler {
 		if(mod.equals(currentMod))
 			return stack;
 
-		CompoundNBT morphData = stack.getTag().getCompound(TAG_TOME_DATA);
+		CompoundTag morphData = stack.getTag().getCompound(TAG_TOME_DATA);
 		return makeMorphedStack(stack, mod, morphData);
 	}
 
-	public static ItemStack makeMorphedStack(ItemStack currentStack, String targetMod, CompoundNBT morphData) {
+	public static ItemStack makeMorphedStack(ItemStack currentStack, String targetMod, CompoundTag morphData) {
 		String currentMod = getModFromStack(currentStack);
 
-		CompoundNBT currentCmp = new CompoundNBT();
-		currentStack.write(currentCmp);
+		CompoundTag currentCmp = new CompoundTag();
+		currentStack.save(currentCmp);
 		currentCmp = currentCmp.copy();
 		if(currentCmp.contains("tag"))
 			currentCmp.getCompound("tag").remove(TAG_TOME_DATA);
@@ -135,31 +140,31 @@ public final class MorphingHandler {
 		if(targetMod.equals(MINECRAFT))
 			stack = new ItemStack(ModItems.tome);
 		else {
-			CompoundNBT targetCmp = morphData.getCompound(targetMod);
+			CompoundTag targetCmp = morphData.getCompound(targetMod);
 			morphData.remove(targetMod);
 
-			stack = ItemStack.read(targetCmp);
+			stack = ItemStack.of(targetCmp);
 			if(stack.isEmpty())
 				stack = new ItemStack(ModItems.tome);
 		}
 
 		if(!stack.hasTag())
-			stack.setTag(new CompoundNBT());
+			stack.setTag(new CompoundTag());
 
-		CompoundNBT stackCmp = stack.getTag();
+		CompoundTag stackCmp = stack.getTag();
 		stackCmp.put(TAG_TOME_DATA, morphData);
 		stackCmp.putBoolean(TAG_MORPHING, true);
 
 		if(stack.getItem() != ModItems.tome) {
-			CompoundNBT displayName = new CompoundNBT();
-			displayName.putString("text", stack.getDisplayName().getString());
+			CompoundTag displayName = new CompoundTag();
+			displayName.putString("text", stack.getHoverName().getString());
 			if(stackCmp.contains(TAG_TOME_DISPLAY_NAME))
-				displayName = (CompoundNBT) stackCmp.get(TAG_TOME_DISPLAY_NAME);
+				displayName = (CompoundTag) stackCmp.get(TAG_TOME_DISPLAY_NAME);
 			else stackCmp.put(TAG_TOME_DISPLAY_NAME, displayName);
 
-			ITextComponent stackName = new StringTextComponent(displayName.getString("text")).setStyle(Style.EMPTY.createStyleFromFormattings(TextFormatting.GREEN));
-			ITextComponent comp = new TranslationTextComponent("akashictome.sudo_name", stackName);
-			stack.setDisplayName(comp);
+			Component stackName = new TextComponent(displayName.getString("text")).setStyle(Style.EMPTY.applyFormats(ChatFormatting.GREEN));
+			Component comp = new TranslatableComponent("akashictome.sudo_name", stackName);
+			stack.setHoverName(comp);
 		}
 
 		stack.setCount(1);
@@ -169,7 +174,7 @@ public final class MorphingHandler {
 	private static final Map<String, String> modNames = new HashMap<String, String>();
 
 	static {
-		for(ModInfo modEntry : ModList.get().getMods())
+		for(IModInfo modEntry : ModList.get().getMods())
 			modNames.put(modEntry.getModId().toLowerCase(Locale.ENGLISH),  modEntry.getDisplayName());
 	}
 

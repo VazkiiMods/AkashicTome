@@ -1,27 +1,27 @@
 package vazkii.akashictome;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
-public class AttachementRecipe extends SpecialRecipe {
+public class AttachementRecipe extends CustomRecipe {
 
 	public AttachementRecipe(ResourceLocation idIn) {
 		super(idIn);
 	}
 
 	@Override
-	public boolean matches(CraftingInventory var1, World var2) {
+	public boolean matches(CraftingContainer var1, Level var2) {
 		boolean foundTool = false;
 		boolean foundTarget = false;
 
-		for(int i = 0; i < var1.getSizeInventory(); i++) {
-			ItemStack stack = var1.getStackInSlot(i);
+		for(int i = 0; i < var1.getContainerSize(); i++) {
+			ItemStack stack = var1.getItem(i);
 			if(!stack.isEmpty()) {
 				if(isTarget(stack)) {
 					if(foundTarget)
@@ -39,12 +39,12 @@ public class AttachementRecipe extends SpecialRecipe {
 	}
 
 	@Override
-	public ItemStack getCraftingResult(CraftingInventory var1) {
+	public ItemStack assemble(CraftingContainer var1) {
 		ItemStack tool = ItemStack.EMPTY;
 		ItemStack target = ItemStack.EMPTY;
 
-		for(int i = 0; i < var1.getSizeInventory(); i++) {
-			ItemStack stack = var1.getStackInSlot(i);
+		for(int i = 0; i < var1.getContainerSize(); i++) {
+			ItemStack stack = var1.getItem(i);
 			if(!stack.isEmpty()) {
 				if(stack.getItem() == ModItems.tome)
 					tool = stack;
@@ -53,30 +53,30 @@ public class AttachementRecipe extends SpecialRecipe {
 		}
 
 		ItemStack copy = tool.copy();
-		CompoundNBT cmp = copy.getTag();
+		CompoundTag cmp = copy.getTag();
 		if(cmp == null) {
-			cmp = new CompoundNBT();
+			cmp = new CompoundTag();
 			copy.setTag(cmp);
 		}
 
 		if(!cmp.contains(MorphingHandler.TAG_TOME_DATA))
-			cmp.put(MorphingHandler.TAG_TOME_DATA, new CompoundNBT());
+			cmp.put(MorphingHandler.TAG_TOME_DATA, new CompoundTag());
 
-		CompoundNBT morphData = cmp.getCompound(MorphingHandler.TAG_TOME_DATA);
+		CompoundTag morphData = cmp.getCompound(MorphingHandler.TAG_TOME_DATA);
 		String mod = MorphingHandler.getModFromStack(target);
 
 		if(morphData.contains(mod))
 			return ItemStack.EMPTY;
 
-		CompoundNBT modCmp = new CompoundNBT();
-		target.write(modCmp);
+		CompoundTag modCmp = new CompoundTag();
+		target.save(modCmp);
 		morphData.put(mod, modCmp);
 
 		return copy;
 	}
 
 	@Override
-	public boolean canFit(int width, int height) {
+	public boolean canCraftInDimensions(int width, int height) {
 		return width * height >= 2;
 	}
 
@@ -99,7 +99,7 @@ public class AttachementRecipe extends SpecialRecipe {
 
 		ResourceLocation registryNameRL = stack.getItem().getRegistryName();
 		String registryName = registryNameRL.toString();
-		if(ConfigHandler.whitelistedItems.get().contains(registryName) || ConfigHandler.whitelistedItems.get().contains(registryName + ":" + stack.getDamage()))
+		if(ConfigHandler.whitelistedItems.get().contains(registryName) || ConfigHandler.whitelistedItems.get().contains(registryName + ":" + stack.getDamageValue()))
 			return true;
 
 		String itemName = registryNameRL.getPath().toLowerCase();
@@ -111,18 +111,18 @@ public class AttachementRecipe extends SpecialRecipe {
 	}
 
 	@Override
-	public ItemStack getRecipeOutput() {
+	public ItemStack getResultItem() {
 		return ItemStack.EMPTY;
 	}
 
 	@Override
-	public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
-		return NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
+	public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
+		return NonNullList.withSize(inv.getContainerSize(), ItemStack.EMPTY);
 	}
 
 	@Override
-	public IRecipeSerializer<?> getSerializer() {
-		return RecipeSerializer.ATTACHMENT;
+	public RecipeSerializer<?> getSerializer() {
+		return AkashicRecipeSerializer.ATTACHMENT;
 	}
 
 }
