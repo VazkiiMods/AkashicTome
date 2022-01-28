@@ -36,7 +36,7 @@ public final class MorphingHandler {
 	@SubscribeEvent
 	public void onPlayerLeftClick(PlayerInteractEvent.LeftClickEmpty event) {
 		ItemStack stack = event.getItemStack();
-		if(stack != null && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
+		if(!stack.isEmpty() && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
 			AkashicTome.sendToServer(new MessageUnmorphTome());
 		}
 	}

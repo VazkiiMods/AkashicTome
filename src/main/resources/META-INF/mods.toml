@@ -14,13 +14,13 @@ The book to end all books.
 [[dependencies.akashictome]]
     modId="autoreglib"
     mandatory=true
-    versionRange="[1.6-46,)"
+    versionRange="[1.7-52,)"
     ordering="AFTER"
     side="BOTH"
 
 [[dependencies.akashictome]]
     modId="forge"
     mandatory=true
-    versionRange="[34.1.0,)"
+    versionRange="[38.0.17,)"
     ordering="AFTER"
     side="BOTH"
