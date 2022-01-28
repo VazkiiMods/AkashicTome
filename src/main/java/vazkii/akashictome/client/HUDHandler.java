@@ -68,10 +68,8 @@ public class HUDHandler {
 					int sy = res.getGuiScaledHeight() / 2 + 2;
 
 					mc.getItemRenderer().renderGuiItem(drawStack, sx, sy);
-					//RenderSystem.disableLighting();
 					mc.font.drawShadow(event.getMatrixStack(), line1, sx + 20, sy + 4, 0xFFFFFFFF);
 					mc.font.drawShadow(event.getMatrixStack(), line2, sx + 25, sy + 14, 0xFFFFFFFF);
-					//RenderSystem.color4f(1F, 1F, 1F, 1F);
 				}
 			}
 		}

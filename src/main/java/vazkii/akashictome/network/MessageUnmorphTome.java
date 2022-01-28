@@ -9,9 +9,6 @@ import vazkii.akashictome.MorphingHandler;
 import vazkii.arl.network.IMessage;
 
 public class MessageUnmorphTome implements IMessage {
-
-	private static final long serialVersionUID = 836964163475506394L;
-
 	public MessageUnmorphTome() { }
 
 	@Override

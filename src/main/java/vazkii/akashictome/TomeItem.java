@@ -42,7 +42,7 @@ public class TomeItem extends BasicItem {
 		BlockPos pos = context.getClickedPos();
 		ItemStack stack = playerIn.getItemInHand(hand);
 		
-		if(playerIn.isDiscrete()) {
+		if(playerIn.isShiftKeyDown()) {
 			String mod = MorphingHandler.getModFromState(worldIn.getBlockState(pos)); 
 			ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, mod);
 			if(!ItemStack.isSame(newStack, stack)) {
@@ -58,7 +58,7 @@ public class TomeItem extends BasicItem {
 	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
 		ItemStack stack = playerIn.getItemInHand(handIn);
 		AkashicTome.proxy.openTomeGUI(playerIn, stack);
-		return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, stack);
+		return InteractionResultHolder.sidedSuccess(stack, worldIn.isClientSide);
 	}
 
 	@Override

@@ -10,11 +10,7 @@ import vazkii.arl.network.IMessage;
 
 public class MessageMorphTome implements IMessage {
 	
-	private static final long serialVersionUID = 8242919341713210397L;
-	
-	public String modid;
-	
-	public MessageMorphTome() { }
+	private final String modid;
 	
 	public MessageMorphTome(String modid) {
 		this.modid = modid;

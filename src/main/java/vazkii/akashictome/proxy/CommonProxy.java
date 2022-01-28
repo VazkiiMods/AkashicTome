@@ -8,9 +8,6 @@ import vazkii.akashictome.MorphingHandler;
 public class CommonProxy {
 
 	public void preInit() {
-//		RecipeHandler.addShapelessRecipe(new ItemStack(ModItems.tome), new ItemStack(Items.BOOK), new ItemStack(Blocks.BOOKSHELF));
-//		RecipeHandler.addShapelessRecipe(new ItemStack(ModItems.tome), new ItemStack(Items.BOOK), "bookshelf"); TODO
-
 		MinecraftForge.EVENT_BUS.register(MorphingHandler.INSTANCE);
 		initHUD();
 	}
