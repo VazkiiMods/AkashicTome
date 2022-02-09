@@ -63,6 +63,11 @@ public class TomeScreen extends Screen {
 	}
 
 	@Override
+	public boolean isPauseScreen() {
+		return false;
+	}
+
+	@Override
 	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		this.definedMod = null;
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
