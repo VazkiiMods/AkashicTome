@@ -8,6 +8,7 @@ import vazkii.akashictome.ModItems;
 import vazkii.akashictome.MorphingHandler;
 import vazkii.arl.network.IMessage;
 
+@SuppressWarnings("serial")
 public class MessageMorphTome implements IMessage {
 	
 	private final String modid;
