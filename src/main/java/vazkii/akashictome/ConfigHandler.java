@@ -1,14 +1,13 @@
 package vazkii.akashictome;
 
-import java.util.List;
-import java.util.function.Predicate;
-
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 
 import net.minecraftforge.common.ForgeConfigSpec;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.List;
+import java.util.function.Predicate;
 
 public class ConfigHandler {
 
@@ -19,7 +18,7 @@ public class ConfigHandler {
 	static final ConfigHandler CONFIG;
 	static final ForgeConfigSpec CONFIG_SPEC;
 
-	static{
+	static {
 		final Pair<ConfigHandler, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(ConfigHandler::new);
 		CONFIG = specPair.getLeft();
 		CONFIG_SPEC = specPair.getRight();
@@ -31,29 +30,31 @@ public class ConfigHandler {
 		Predicate<Object> validator = o -> o instanceof String;
 
 		whitelistedItems = builder.defineList("Whitelisted Items",
-				Lists.newArrayList("roots:runedtablet", 
-						"opencomputers:tool:4", 
-						"immersiveengineering:tool:3", 
-						"integrateddynamics:on_the_dynamics_of_integration", 
+				Lists.newArrayList("roots:runedtablet",
+						"opencomputers:tool:4",
+						"immersiveengineering:tool:3",
+						"integrateddynamics:on_the_dynamics_of_integration",
 						"theoneprobe:probenote",
 						"evilcraft:origins_of_darkness",
 						"draconicevolution:info_tablet",
 						"charset:tablet",
 						"antiqueatlas:antique_atlas",
-						"occultism:dictionary_of_spirits"), validator);
+						"occultism:dictionary_of_spirits"),
+				validator);
 
 		whitelistedNames = builder.defineList("Whitelisted Names",
-				Lists.newArrayList("book", 
-						"tome", 
-						"lexicon", 
-						"nomicon", 
-						"manual", 
-						"knowledge", 
-						"pedia", 
-						"compendium", 
-						"guide", 
-						"codex", 
-						"journal"), validator);
+				Lists.newArrayList("book",
+						"tome",
+						"lexicon",
+						"nomicon",
+						"manual",
+						"knowledge",
+						"pedia",
+						"compendium",
+						"guide",
+						"codex",
+						"journal"),
+				validator);
 
 		blacklistedMods = builder.defineList("Blacklisted Mods", Lists.newArrayList(), validator);
 
@@ -61,7 +62,7 @@ public class ConfigHandler {
 				Lists.newArrayList("nautralpledge=botania",
 						"thermalexpansion=thermalfoundation",
 						"thermaldynamics=thermalfoundation",
-						"thermalcultivation=thermalfoundation", 
+						"thermalcultivation=thermalfoundation",
 						"redstonearsenal=thermalfoundation",
 						"rftoolsdim=rftools",
 						"rftoolspower=rftools",
@@ -75,7 +76,8 @@ public class ConfigHandler {
 						"xnet=rftools",
 						"buildcrafttransport=buildcraft",
 						"buildcraftfactory=buildcraft",
-						"buildcraftsilicon=buildcraft"), validator);
+						"buildcraftsilicon=buildcraft"),
+				validator);
 
 	}
 }

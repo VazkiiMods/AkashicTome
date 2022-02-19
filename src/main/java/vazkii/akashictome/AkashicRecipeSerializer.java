@@ -10,14 +10,14 @@ import net.minecraftforge.registries.IForgeRegistry;
 
 public class AkashicRecipeSerializer {
 
-    public static final RecipeSerializer<AttachementRecipe> ATTACHMENT = new SimpleRecipeSerializer<>(AttachementRecipe::new);
+	public static final RecipeSerializer<AttachementRecipe> ATTACHMENT = new SimpleRecipeSerializer<>(AttachementRecipe::new);
 
-    @Mod.EventBusSubscriber(modid = AkashicTome.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
-    public static class Registration {
-        @SubscribeEvent
-        public static void onRecipeSerializerRegistry(final RegistryEvent.Register<RecipeSerializer<?>> event) {
-            IForgeRegistry<RecipeSerializer<?>> registry = event.getRegistry();
-            registry.register(ATTACHMENT.setRegistryName(new ResourceLocation(AkashicTome.MOD_ID, "attachment")));
-        }
-    }
+	@Mod.EventBusSubscriber(modid = AkashicTome.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+	public static class Registration {
+		@SubscribeEvent
+		public static void onRecipeSerializerRegistry(final RegistryEvent.Register<RecipeSerializer<?>> event) {
+			IForgeRegistry<RecipeSerializer<?>> registry = event.getRegistry();
+			registry.register(ATTACHMENT.setRegistryName(new ResourceLocation(AkashicTome.MOD_ID, "attachment")));
+		}
+	}
 }

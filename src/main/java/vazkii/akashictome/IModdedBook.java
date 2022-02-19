@@ -1,3 +1,4 @@
 package vazkii.akashictome;
 
-public interface IModdedBook {}
+public interface IModdedBook {
+}

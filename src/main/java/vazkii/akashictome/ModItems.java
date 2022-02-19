@@ -6,7 +6,6 @@ public final class ModItems {
 
 	public static final Item tome = new TomeItem();
 
-	public static void init() {
-	}
+	public static void init() {}
 
 }

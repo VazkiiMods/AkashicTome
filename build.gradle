@@ -9,6 +9,9 @@ buildscript {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
+plugins {
+    id 'com.diffplug.spotless' version '5.12.5'
+}
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
@@ -87,6 +90,18 @@ dependencies {
     minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
 
     implementation fg.deobf("vazkii.autoreglib:AutoRegLib:${config.arl_version}")
+}
+
+spotless {
+    enforceCheck = false // workaround around jenkins having wrong line endings in some files
+    java {
+        target project.fileTree(dir: 'src/main/java/vazkii/akashictome', include: '**/*.java')
+        //indentWithTabs()
+        eclipse().configFile 'spotless/eclipseformat.xml'
+        removeUnusedImports()
+        importOrderFile 'spotless/eclipse.importorder'
+        replaceRegex 'Not enough space after if', '(if|for|while|switch)\\(', '$1 ('
+    }
 }
 
 processResources {
