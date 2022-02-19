@@ -15,6 +15,7 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'pmd'
 
 ext.configFile = file('build.properties')
 ext.config = parseConfig(configFile)
@@ -104,6 +105,18 @@ spotless {
     }
 }
 
+pmd {
+    toolVersion '6.22.0'
+    // no way around this warning unless we upgrade Gradle, apparently
+    //incrementalAnalysis.set(true)
+    ruleSets.clear()
+    ruleSetFiles = files("spotless/pmd-ruleset.xml")
+}
+
+task checkSyntax (group: "verification") {
+    dependsOn spotlessJavaCheck, pmdMain
+}
+
 processResources {
     // replace stuff in mcmod.info, nothing else
     filesMatching('META-INF/mods.toml') {
@@ -112,6 +125,7 @@ processResources {
         expand 'version': project.version
     }
 }
+
 
 task incrementBuildNumber {
     doFirst {
@@ -171,4 +185,4 @@ jar {
     exclude "**/unused"
 }
 
-defaultTasks 'clean', 'build', 'sortArtifacts', 'incrementBuildNumber'
+defaultTasks 'clean', 'checkSyntax', 'build', 'sortArtifacts', 'incrementBuildNumber'
