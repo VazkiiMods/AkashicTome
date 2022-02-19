@@ -4,8 +4,10 @@ import net.minecraft.world.item.Item;
 
 public final class ModItems {
 
-	public static final Item tome = new TomeItem();
+	public static Item tome;
 
-	public static void init() {}
+	public static void init() {
+		tome = new TomeItem();
+	}
 
 }
