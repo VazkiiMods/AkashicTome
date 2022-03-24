@@ -39,7 +39,6 @@ public class MessageMorphTome implements IMessage {
 
 				if (hasTome) {
 					ItemStack newStack = MorphingHandler.getShiftStackForMod(tomeStack, modid);
-					System.out.println(newStack);
 					player.setItemInHand(hand, newStack);
 				}
 			});

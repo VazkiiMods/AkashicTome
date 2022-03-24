@@ -172,7 +172,7 @@ public final class MorphingHandler {
 		return stack;
 	}
 
-	private static final Map<String, String> modNames = new HashMap<String, String>();
+	private static final Map<String, String> modNames = new HashMap<>();
 
 	static {
 		for (IModInfo modEntry : ModList.get().getMods())
