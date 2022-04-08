@@ -1,12 +1,12 @@
 modLoader="javafml"
-loaderVersion="[34,)"
+loaderVersion="[40,)"
 issueTrackerURL="https://github.com/Vazkii/AkashicTome"
 license="Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License"
 
 [[mods]]
 modId="akashictome"
 displayName="Akashic Tome"
-version="${version}"
+version="${file.jarVersion}"
 authors="Vazkii, MoreThanHidden"
 description='''
 The book to end all books.
