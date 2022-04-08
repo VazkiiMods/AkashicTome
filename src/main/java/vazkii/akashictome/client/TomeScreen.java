@@ -1,5 +1,10 @@
 package vazkii.akashictome.client;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.Window;
@@ -18,21 +23,15 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-
 import vazkii.akashictome.AkashicTome;
 import vazkii.akashictome.MorphingHandler;
 import vazkii.akashictome.network.MessageMorphTome;
 import vazkii.arl.util.ItemNBTHelper;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class TomeScreen extends Screen {
 
@@ -124,8 +123,11 @@ public class TomeScreen extends Screen {
 			String mod = ChatFormatting.GRAY + MorphingHandler.getModNameForId(tempDefinedMod);
 			tempDefinedMod = ItemNBTHelper.getString(tooltipStack, MorphingHandler.TAG_ITEM_DEFINED_MOD, tempDefinedMod);
 
-			String trueName = name.getString("text");
-			List<TextComponent> tooltipList = Arrays.stream(new String[] { trueName, mod }).map(TextComponent::new).collect(Collectors.toList());
+			Component comp = Component.Serializer.fromJson(name.getString("text"));
+			if(comp == null)
+				comp = tooltipStack.getHoverName();
+			
+			List<Component> tooltipList = Arrays.asList(comp, new TextComponent(mod));
 
 			renderComponentTooltip(matrixStack, tooltipList, mouseX, mouseY, this.font);
 			this.definedMod = tempDefinedMod;

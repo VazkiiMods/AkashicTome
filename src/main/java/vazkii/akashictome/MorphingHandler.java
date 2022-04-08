@@ -1,8 +1,13 @@
 package vazkii.akashictome;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -14,13 +19,8 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.IModInfo;
-
 import vazkii.akashictome.network.MessageUnmorphTome;
 import vazkii.arl.util.ItemNBTHelper;
-
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 
 public final class MorphingHandler {
 
@@ -117,17 +117,24 @@ public final class MorphingHandler {
 			return stack;
 
 		String currentMod = getModFromStack(stack);
+		String defined = ItemNBTHelper.getString(stack, TAG_ITEM_DEFINED_MOD, "");
+		if(!defined.isEmpty())
+			currentMod = defined;
+		
 		if (mod.equals(currentMod))
 			return stack;
-
+		
 		CompoundTag morphData = stack.getTag().getCompound(TAG_TOME_DATA);
 		return makeMorphedStack(stack, mod, morphData);
 	}
 
 	public static ItemStack makeMorphedStack(ItemStack currentStack, String targetMod, CompoundTag morphData) {
 		String currentMod = getModFromStack(currentStack);
-
-		CompoundTag currentCmp = new CompoundTag();
+		String defined = ItemNBTHelper.getString(currentStack, TAG_ITEM_DEFINED_MOD, "");
+		if(!defined.isEmpty())
+			currentMod = defined;
+		
+ 		CompoundTag currentCmp = new CompoundTag();
 		currentStack.save(currentCmp);
 		currentCmp = currentCmp.copy();
 		if (currentCmp.contains("tag"))
@@ -157,13 +164,21 @@ public final class MorphingHandler {
 
 		if (stack.getItem() != ModItems.tome) {
 			CompoundTag displayName = new CompoundTag();
-			displayName.putString("text", stack.getHoverName().getString());
+			CompoundTag ogDisplayName = displayName;
+			displayName.putString("text",  Component.Serializer.toJson(stack.getHoverName()));
+			
 			if (stackCmp.contains(TAG_TOME_DISPLAY_NAME))
 				displayName = (CompoundTag) stackCmp.get(TAG_TOME_DISPLAY_NAME);
 			else
 				stackCmp.put(TAG_TOME_DISPLAY_NAME, displayName);
 
-			Component stackName = new TextComponent(displayName.getString("text")).setStyle(Style.EMPTY.applyFormats(ChatFormatting.GREEN));
+			MutableComponent rawComp = Component.Serializer.fromJson(displayName.getString("text"));
+			if(rawComp == null) {
+				stackCmp.put(TAG_TOME_DISPLAY_NAME, displayName);
+				displayName = ogDisplayName;
+			}
+			
+			Component stackName = rawComp.setStyle(Style.EMPTY.applyFormats(ChatFormatting.GREEN));
 			Component comp = new TranslatableComponent("akashictome.sudo_name", stackName);
 			stack.setHoverName(comp);
 		}
