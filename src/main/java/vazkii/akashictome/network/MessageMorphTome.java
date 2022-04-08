@@ -12,9 +12,9 @@ import vazkii.arl.network.IMessage;
 @SuppressWarnings("serial")
 public class MessageMorphTome implements IMessage {
 
-	public String modid; 
+	public String modid;
 
-	public MessageMorphTome() { }
+	public MessageMorphTome() {}
 
 	public MessageMorphTome(String modid) {
 		this.modid = modid;

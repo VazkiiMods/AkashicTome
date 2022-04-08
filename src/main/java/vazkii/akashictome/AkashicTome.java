@@ -8,6 +8,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkDirection;
+
 import vazkii.akashictome.network.MessageMorphTome;
 import vazkii.akashictome.network.MessageUnmorphTome;
 import vazkii.akashictome.proxy.ClientProxy;
@@ -26,7 +27,7 @@ public class AkashicTome {
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		bus.addListener(this::commonSetup);
 		bus.register(ModItems.class);
-		
+
 		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigHandler.CONFIG_SPEC);
 
 		proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> CommonProxy::new);

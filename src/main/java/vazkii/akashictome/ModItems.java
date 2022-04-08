@@ -11,7 +11,7 @@ public final class ModItems {
 
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public static void onRegistryInit(RegistryEvent.Register<?> event) {
-		if(tome == null)
+		if (tome == null)
 			tome = new TomeItem();
 	}
 

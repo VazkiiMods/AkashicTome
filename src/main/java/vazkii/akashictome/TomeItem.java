@@ -86,7 +86,7 @@ public class TomeItem extends BasicItem {
 						if (modStack.hasTag() && modStack.getTag().contains(MorphingHandler.TAG_TOME_DISPLAY_NAME)) {
 							CompoundTag rawName = ((CompoundTag) modStack.getTag().get(MorphingHandler.TAG_TOME_DISPLAY_NAME));
 							Component nameComp = Component.Serializer.fromJson(rawName.getString("text"));
-							if(nameComp != null)
+							if (nameComp != null)
 								name = nameComp.getString();
 						}
 						String mod = MorphingHandler.getModFromStack(modStack);

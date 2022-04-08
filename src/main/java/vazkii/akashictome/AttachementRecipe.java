@@ -8,6 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
+
 import vazkii.arl.util.ItemNBTHelper;
 
 public class AttachementRecipe extends CustomRecipe {
@@ -66,20 +67,20 @@ public class AttachementRecipe extends CustomRecipe {
 			cmp.put(MorphingHandler.TAG_TOME_DATA, new CompoundTag());
 
 		CompoundTag morphData = cmp.getCompound(MorphingHandler.TAG_TOME_DATA);
-		
+
 		String mod = MorphingHandler.getModFromStack(target);
 		String modRoot = mod;
 		int tries = 0;
-		
-		while(morphData.contains(mod) && tries < 99) {
+
+		while (morphData.contains(mod) && tries < 99) {
 			mod = modRoot + "_" + tries;
 			tries++;
 		}
 
 		CompoundTag modCmp = new CompoundTag();
-		if(tries > 0)
+		if (tries > 0)
 			ItemNBTHelper.setString(target, MorphingHandler.TAG_ITEM_DEFINED_MOD, mod);
-		
+
 		target.save(modCmp);
 		morphData.put(mod, modCmp);
 
@@ -96,10 +97,10 @@ public class AttachementRecipe extends CustomRecipe {
 			return false;
 
 		String mod = MorphingHandler.getModFromStack(stack);
-		
+
 		if (mod.equals(MorphingHandler.MINECRAFT))
 			return false;
-		
+
 		if (ConfigHandler.allItems.get())
 			return true;
 
