@@ -1,9 +1,9 @@
 package vazkii.akashictome;
 
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.RegisterEvent;
 
 public final class ModItems {
 
