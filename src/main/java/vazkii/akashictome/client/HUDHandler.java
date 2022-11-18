@@ -10,8 +10,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+// import net.minecraftforge.client.event.RenderGuiOverlayEvent.ElementType;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import org.lwjgl.opengl.GL11;
@@ -23,9 +23,9 @@ import vazkii.arl.util.ItemNBTHelper;
 public class HUDHandler {
 
 	@SubscribeEvent
-	public void onDrawScreen(RenderGameOverlayEvent.Post event) {
-		if (event.getType() != ElementType.ALL)
-			return;
+	public void onDrawScreen(RenderGuiOverlayEvent.Post event) {
+		// if (event.getType() != ElementType.ALL)
+		// 	return;
 
 		Minecraft mc = Minecraft.getInstance();
 		HitResult pos = mc.hitResult;
@@ -68,8 +68,8 @@ public class HUDHandler {
 					int sy = res.getGuiScaledHeight() / 2 + 2;
 
 					mc.getItemRenderer().renderGuiItem(drawStack, sx, sy);
-					mc.font.drawShadow(event.getMatrixStack(), line1, sx + 20, sy + 4, 0xFFFFFFFF);
-					mc.font.drawShadow(event.getMatrixStack(), line2, sx + 25, sy + 14, 0xFFFFFFFF);
+					mc.font.drawShadow(event.getPoseStack(), line1, sx + 20, sy + 4, 0xFFFFFFFF);
+					mc.font.drawShadow(event.getPoseStack(), line2, sx + 25, sy + 14, 0xFFFFFFFF);
 				}
 			}
 		}
