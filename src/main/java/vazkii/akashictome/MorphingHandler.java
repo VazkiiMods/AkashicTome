@@ -5,8 +5,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -15,6 +13,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.IModInfo;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import vazkii.akashictome.network.MessageUnmorphTome;
 import vazkii.arl.util.ItemNBTHelper;
@@ -47,7 +46,7 @@ public final class MorphingHandler {
 		if (!event.getPlayer().isDiscrete())
 			return;
 
-		ItemEntity e = event.getEntityItem();
+		ItemEntity e = event.getEntity();
 		ItemStack stack = e.getItem();
 		if (!stack.isEmpty() && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
 			CompoundTag morphData = stack.getTag().getCompound(TAG_TOME_DATA).copy();
@@ -73,7 +72,7 @@ public final class MorphingHandler {
 			Component displayName = null;
 			CompoundTag nameCmp = (CompoundTag) copyCmp.get(TAG_TOME_DISPLAY_NAME);
 			if (nameCmp != null)
-				displayName = new TextComponent(nameCmp.getString("text"));
+				displayName = Component.literal(nameCmp.getString("text"));
 			if (displayName != null && !displayName.getString().isEmpty() && displayName != copy.getHoverName())
 				copy.setHoverName(displayName);
 
@@ -86,7 +85,7 @@ public final class MorphingHandler {
 	}
 
 	public static String getModFromState(BlockState state) {
-		return getModOrAlias(state.getBlock().getRegistryName().getNamespace());
+		return getModOrAlias(ForgeRegistries.BLOCKS.getKey(state.getBlock()).getNamespace());
 	}
 
 	public static String getModFromStack(ItemStack stack) {
@@ -180,7 +179,7 @@ public final class MorphingHandler {
 			}
 
 			Component stackName = rawComp.setStyle(Style.EMPTY.applyFormats(ChatFormatting.GREEN));
-			Component comp = new TranslatableComponent("akashictome.sudo_name", stackName);
+			Component comp = Component.translatable("akashictome.sudo_name", stackName);
 			stack.setHoverName(comp);
 		}
 

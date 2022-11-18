@@ -19,7 +19,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -43,7 +42,7 @@ public class TomeScreen extends Screen {
 	String definedMod;
 
 	public TomeScreen(ItemStack tome) {
-		super(new TextComponent(""));
+		super(Component.empty());
 		this.tome = tome;
 		BOOK_MODEL = new BookModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.BOOK));
 	}
@@ -128,7 +127,7 @@ public class TomeScreen extends Screen {
 			if (comp == null)
 				comp = tooltipStack.getHoverName();
 
-			List<Component> tooltipList = Arrays.asList(comp, new TextComponent(mod));
+			List<Component> tooltipList = Arrays.asList(comp, Component.literal(mod));
 
 			renderComponentTooltip(matrixStack, tooltipList, mouseX, mouseY, this.font);
 			this.definedMod = tempDefinedMod;

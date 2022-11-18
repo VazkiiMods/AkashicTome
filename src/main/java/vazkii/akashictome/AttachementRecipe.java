@@ -8,6 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import vazkii.arl.util.ItemNBTHelper;
 
@@ -110,7 +111,7 @@ public class AttachementRecipe extends CustomRecipe {
 		if (stack.getItem() instanceof IModdedBook)
 			return true;
 
-		ResourceLocation registryNameRL = stack.getItem().getRegistryName();
+		ResourceLocation registryNameRL = ForgeRegistries.ITEMS.getKey(stack.getItem());
 		String registryName = registryNameRL.toString();
 		if (ConfigHandler.whitelistedItems.get().contains(registryName) || ConfigHandler.whitelistedItems.get().contains(registryName + ":" + stack.getDamageValue()))
 			return true;

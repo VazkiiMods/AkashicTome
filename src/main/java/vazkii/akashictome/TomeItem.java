@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -92,8 +91,8 @@ public class TomeItem extends BasicItem {
 						String mod = MorphingHandler.getModFromStack(modStack);
 
 						if (!currMod.equals(mod))
-							tooltip.add(new TextComponent(MorphingHandler.getModNameForId(mod)).setStyle(Style.EMPTY.applyFormats(ChatFormatting.AQUA)));
-						tooltip.add(new TextComponent(" \u2520 " + name));
+							tooltip.add(Component.literal(MorphingHandler.getModNameForId(mod)).setStyle(Style.EMPTY.applyFormats(ChatFormatting.AQUA)));
+						tooltip.add(Component.literal(" \u2520 " + name));
 
 						currMod = mod;
 					}
@@ -102,7 +101,7 @@ public class TomeItem extends BasicItem {
 		}
 		);
 
-		tooltipList.forEach(tip -> tooltip.add(new TextComponent(tip)));
+		tooltipList.forEach(tip -> tooltip.add(Component.literal(tip)));
 	}
 
 }
