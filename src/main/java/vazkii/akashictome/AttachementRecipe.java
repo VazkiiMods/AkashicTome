@@ -9,7 +9,6 @@ import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
-
 import vazkii.arl.util.ItemNBTHelper;
 
 public class AttachementRecipe extends CustomRecipe {
@@ -136,7 +135,7 @@ public class AttachementRecipe extends CustomRecipe {
 
 	@Override
 	public RecipeSerializer<?> getSerializer() {
-		return AkashicRecipeSerializer.ATTACHMENT;
+		return ModItems.ATTACHMENT;
 	}
 
 }
