@@ -40,7 +40,8 @@ public class ConfigHandler {
 						"charset:tablet",
 						"antiqueatlas:antique_atlas",
 						"occultism:dictionary_of_spirits",
-						"alexsmobs:animal_dictionary"),
+						"alexsmobs:animal_dictionary",
+						"theurgy:grimiore"),
 				validator);
 
 		whitelistedNames = builder.defineList("Whitelisted Names",
