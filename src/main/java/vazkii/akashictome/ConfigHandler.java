@@ -41,7 +41,12 @@ public class ConfigHandler {
 						"antiqueatlas:antique_atlas",
 						"occultism:dictionary_of_spirits",
 						"alexsmobs:animal_dictionary",
-						"theurgy:grimiore"),
+						"theurgy:grimiore",
+						"tconstruct:materials_and_you",
+						"tconstruct:puny_smelting",
+						"tconstruct:mighty_smelting",
+						"tconstruct:tinkers_gadgetry",
+						"tconstruct:fantastic_foundry"),
 				validator);
 
 		whitelistedNames = builder.defineList("Whitelisted Names",
