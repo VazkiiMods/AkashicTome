@@ -39,8 +39,6 @@ public class ConfigHandler {
 						"draconicevolution:info_tablet",
 						"charset:tablet",
 						"antiqueatlas:antique_atlas",
-						"occultism:dictionary_of_spirits",
-						"alexsmobs:animal_dictionary",
 						"theurgy:grimiore",
 						"tconstruct:materials_and_you",
 						"tconstruct:puny_smelting",
@@ -60,7 +58,8 @@ public class ConfigHandler {
 						"compendium",
 						"guide",
 						"codex",
-						"journal"),
+						"journal",
+						"dictionary"),
 				validator);
 
 		blacklistedMods = builder.defineList("Blacklisted Mods", Lists.newArrayList(), validator);
