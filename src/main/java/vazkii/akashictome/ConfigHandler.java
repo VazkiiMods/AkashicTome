@@ -59,8 +59,8 @@ public class ConfigHandler {
 						"compendium",
 						"guide",
 						"codex",
-						"journal",
-						"dictionary"),
+						"dictionary",
+						"journal"),
 				validator);
 
 		blacklistedMods = builder.defineList("Blacklisted Mods", Lists.newArrayList(), validator);
