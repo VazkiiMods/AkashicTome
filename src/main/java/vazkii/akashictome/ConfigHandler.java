@@ -44,7 +44,8 @@ public class ConfigHandler {
 						"tconstruct:puny_smelting",
 						"tconstruct:mighty_smelting",
 						"tconstruct:tinkers_gadgetry",
-						"tconstruct:fantastic_foundry"),
+						"tconstruct:fantastic_foundry",
+						"tetra:holo"),
 				validator);
 
 		whitelistedNames = builder.defineList("Whitelisted Names",
