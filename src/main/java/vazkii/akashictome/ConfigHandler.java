@@ -14,7 +14,8 @@ public class ConfigHandler {
 	public static ForgeConfigSpec.BooleanValue allItems;
 	public static ForgeConfigSpec.ConfigValue<List<? extends String>> whitelistedItems, whitelistedNames, blacklistedMods;
 	public static ForgeConfigSpec.ConfigValue<List<? extends String>> aliasesList;
-
+	public static ForgeConfigSpec.BooleanValue hideBookRender;
+	
 	static final ConfigHandler CONFIG;
 	static final ForgeConfigSpec CONFIG_SPEC;
 
@@ -78,6 +79,7 @@ public class ConfigHandler {
 						"buildcraftfactory=buildcraft",
 						"buildcraftsilicon=buildcraft"),
 				validator);
-
+		
+		hideBookRender = builder.define("Hide Book Render", false);
 	}
 }
