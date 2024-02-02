@@ -1,16 +1,21 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://repo.spongepowered.org/maven' }
         jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
+}
+plugins {
+    id 'com.diffplug.spotless' version '5.12.5'
 }
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'pmd'
 
 ext.configFile = file('build.properties')
 ext.config = parseConfig(configFile)
@@ -19,7 +24,9 @@ version = "${config.version}-${config.build_number}"
 group = "vazkii.${config.mod_id}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = config.mod_name
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+compileJava.options.compilerArgs << "-Xlint:all,-classfile,-processing,-deprecation" << "-Werror"
 
 if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
@@ -74,36 +81,40 @@ minecraft {
 
 repositories {
     maven {
-        // for Yarn2MCP
-        name "yarn2mcp"
-        url "https://maven.tterrag.com/"
-    }
-    maven {
         // for AutoRegLib
         name "blamejared"
-        url "http://maven.blamejared.com/"
+        url "https://maven.blamejared.com/"
     }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
 
-    compile fg.deobf("vazkii.autoreglib:AutoRegLib:${config.arl_version}")
+    implementation fg.deobf("vazkii.autoreglib:AutoRegLib:${config.arl_version}")
 }
 
-processResources {
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'META-INF/mods.toml'
-
-        // replace version and mcversion
-        expand 'version': project.version
+spotless {
+    enforceCheck = false // workaround around jenkins having wrong line endings in some files
+    java {
+        target project.fileTree(dir: 'src/main/java/vazkii/akashictome', include: '**/*.java')
+        //indentWithTabs()
+        eclipse().configFile 'spotless/eclipseformat.xml'
+        removeUnusedImports()
+        importOrderFile 'spotless/eclipse.importorder'
+        replaceRegex 'Not enough space after if', '(if|for|while|switch)\\(', '$1 ('
     }
+}
 
-    // copy everything else, thats not the mods.toml
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'META-INF/mods.toml', '**/psd/**'
-    }
+pmd {
+    toolVersion '6.22.0'
+    // no way around this warning unless we upgrade Gradle, apparently
+    //incrementalAnalysis.set(true)
+    ruleSets.clear()
+    ruleSetFiles = files("spotless/pmd-ruleset.xml")
+}
+
+task checkSyntax (group: "verification") {
+    dependsOn spotlessJavaCheck, pmdMain
 }
 
 task incrementBuildNumber {
@@ -113,9 +124,6 @@ task incrementBuildNumber {
             config.toProperties().store(it, "")
         }
     }
-
-    //file('web/versions.ini').append("\n${version}=${minecraft.version}")
-    //file("${config.dir_repo}/version/${minecraft.version}.txt").write("${version}")
 }
 
 import java.util.regex.Pattern
@@ -167,12 +175,4 @@ jar {
     exclude "**/unused"
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "file://" + (System.getenv("local_maven") != null ? System.getenv("local_maven") : System.getenv("bamboo_local_maven")))
-        }
-    }
-}
-
-defaultTasks 'clean', 'build', 'sortArtifacts', 'incrementBuildNumber'
+defaultTasks 'clean', 'checkSyntax', 'build', 'sortArtifacts', 'incrementBuildNumber'

@@ -1,37 +1,41 @@
 package vazkii.akashictome;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
 
-public class AttachementRecipe extends SpecialRecipe {
+import vazkii.arl.util.ItemNBTHelper;
+
+public class AttachementRecipe extends CustomRecipe {
 
 	public AttachementRecipe(ResourceLocation idIn) {
 		super(idIn);
 	}
 
 	@Override
-	public boolean matches(CraftingInventory var1, World var2) {
+	public boolean matches(CraftingContainer var1, Level var2) {
 		boolean foundTool = false;
 		boolean foundTarget = false;
 
-		for(int i = 0; i < var1.getSizeInventory(); i++) {
-			ItemStack stack = var1.getStackInSlot(i);
-			if(!stack.isEmpty()) {
-				if(isTarget(stack)) {
-					if(foundTarget)
+		for (int i = 0; i < var1.getContainerSize(); i++) {
+			ItemStack stack = var1.getItem(i);
+			if (!stack.isEmpty()) {
+				if (isTarget(stack)) {
+					if (foundTarget)
 						return false;
 					foundTarget = true;
-				} else if(stack.getItem() == ModItems.tome) {
-					if(foundTool)
+				} else if (stack.getItem() == ModItems.tome) {
+					if (foundTool)
 						return false;
 					foundTool = true;
-				} else return false;
+				} else
+					return false;
 			}
 		}
 
@@ -39,90 +43,100 @@ public class AttachementRecipe extends SpecialRecipe {
 	}
 
 	@Override
-	public ItemStack getCraftingResult(CraftingInventory var1) {
+	public ItemStack assemble(CraftingContainer var1) {
 		ItemStack tool = ItemStack.EMPTY;
 		ItemStack target = ItemStack.EMPTY;
 
-		for(int i = 0; i < var1.getSizeInventory(); i++) {
-			ItemStack stack = var1.getStackInSlot(i);
-			if(!stack.isEmpty()) {
-				if(stack.getItem() == ModItems.tome)
+		for (int i = 0; i < var1.getContainerSize(); i++) {
+			ItemStack stack = var1.getItem(i);
+			if (!stack.isEmpty()) {
+				if (stack.getItem() == ModItems.tome)
 					tool = stack;
-				else target = stack;
+				else
+					target = stack;
 			}
 		}
 
 		ItemStack copy = tool.copy();
-		CompoundNBT cmp = copy.getTag();
-		if(cmp == null) {
-			cmp = new CompoundNBT();
+		CompoundTag cmp = copy.getTag();
+		if (cmp == null) {
+			cmp = new CompoundTag();
 			copy.setTag(cmp);
 		}
 
-		if(!cmp.contains(MorphingHandler.TAG_TOME_DATA))
-			cmp.put(MorphingHandler.TAG_TOME_DATA, new CompoundNBT());
+		if (!cmp.contains(MorphingHandler.TAG_TOME_DATA))
+			cmp.put(MorphingHandler.TAG_TOME_DATA, new CompoundTag());
 
-		CompoundNBT morphData = cmp.getCompound(MorphingHandler.TAG_TOME_DATA);
+		CompoundTag morphData = cmp.getCompound(MorphingHandler.TAG_TOME_DATA);
+
 		String mod = MorphingHandler.getModFromStack(target);
+		String modRoot = mod;
+		int tries = 0;
 
-		if(morphData.contains(mod))
-			return ItemStack.EMPTY;
+		while (morphData.contains(mod) && tries < 99) {
+			mod = modRoot + "_" + tries;
+			tries++;
+		}
 
-		CompoundNBT modCmp = new CompoundNBT();
-		target.write(modCmp);
+		CompoundTag modCmp = new CompoundTag();
+		if (tries > 0)
+			ItemNBTHelper.setString(target, MorphingHandler.TAG_ITEM_DEFINED_MOD, mod);
+
+		target.save(modCmp);
 		morphData.put(mod, modCmp);
 
 		return copy;
 	}
 
 	@Override
-	public boolean canFit(int width, int height) {
+	public boolean canCraftInDimensions(int width, int height) {
 		return width * height >= 2;
 	}
 
 	public boolean isTarget(ItemStack stack) {
-		if(stack.isEmpty() || MorphingHandler.isAkashicTome(stack))
+		if (stack.isEmpty() || MorphingHandler.isAkashicTome(stack))
 			return false;
 
 		String mod = MorphingHandler.getModFromStack(stack);
-		if(mod.equals(MorphingHandler.MINECRAFT))
+
+		if (mod.equals(MorphingHandler.MINECRAFT))
 			return false;
 
-		if(ConfigHandler.allItems.get())
+		if (ConfigHandler.allItems.get())
 			return true;
 
-		if(ConfigHandler.blacklistedMods.get().contains(mod))
+		if (ConfigHandler.blacklistedMods.get().contains(mod))
 			return false;
 
-		if(stack.getItem() instanceof IModdedBook)
+		if (stack.getItem() instanceof IModdedBook)
 			return true;
 
-		ResourceLocation registryNameRL = stack.getItem().getRegistryName();
+		ResourceLocation registryNameRL = ForgeRegistries.ITEMS.getKey(stack.getItem());
 		String registryName = registryNameRL.toString();
-		if(ConfigHandler.whitelistedItems.get().contains(registryName) || ConfigHandler.whitelistedItems.get().contains(registryName + ":" + stack.getDamage()))
+		if (ConfigHandler.whitelistedItems.get().contains(registryName) || ConfigHandler.whitelistedItems.get().contains(registryName + ":" + stack.getDamageValue()))
 			return true;
 
 		String itemName = registryNameRL.getPath().toLowerCase();
-		for(String s : ConfigHandler.whitelistedNames.get())
-			if(itemName.contains(s.toLowerCase()))
+		for (String s : ConfigHandler.whitelistedNames.get())
+			if (itemName.contains(s.toLowerCase()))
 				return true;
 
 		return false;
 	}
 
 	@Override
-	public ItemStack getRecipeOutput() {
+	public ItemStack getResultItem() {
 		return ItemStack.EMPTY;
 	}
 
 	@Override
-	public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
-		return NonNullList.withSize(inv.getSizeInventory(), ItemStack.EMPTY);
+	public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
+		return NonNullList.withSize(inv.getContainerSize(), ItemStack.EMPTY);
 	}
 
 	@Override
-	public IRecipeSerializer<?> getSerializer() {
-		return RecipeSerializer.ATTACHMENT;
+	public RecipeSerializer<?> getSerializer() {
+		return ModItems.ATTACHMENT;
 	}
 
 }
