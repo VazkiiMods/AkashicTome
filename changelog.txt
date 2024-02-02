@@ -1,0 +1,2 @@
+- Updated several lang files
+- Added a bunch of mod books to the default config
