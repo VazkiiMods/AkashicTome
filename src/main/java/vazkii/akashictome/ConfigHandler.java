@@ -46,8 +46,8 @@ public class ConfigHandler {
 						"tconstruct:mighty_smelting",
 						"tconstruct:tinkers_gadgetry",
 						"tconstruct:fantastic_foundry",
-						"tetra:holo"),
-				validator);
+						"tetra:holo",
+            "occultism:dictionary_of_spirits"), validator);
 
 		whitelistedNames = builder.defineList("Whitelisted Names",
 				Lists.newArrayList("book",
