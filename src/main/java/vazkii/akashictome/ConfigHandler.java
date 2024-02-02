@@ -40,7 +40,13 @@ public class ConfigHandler {
 						"draconicevolution:info_tablet",
 						"charset:tablet",
 						"antiqueatlas:antique_atlas",
-						"occultism:dictionary_of_spirits"),
+						"theurgy:grimiore",
+						"tconstruct:materials_and_you",
+						"tconstruct:puny_smelting",
+						"tconstruct:mighty_smelting",
+						"tconstruct:tinkers_gadgetry",
+						"tconstruct:fantastic_foundry",
+						"tetra:holo"),
 				validator);
 
 		whitelistedNames = builder.defineList("Whitelisted Names",
@@ -54,6 +60,7 @@ public class ConfigHandler {
 						"compendium",
 						"guide",
 						"codex",
+						"dictionary",
 						"journal"),
 				validator);
 
