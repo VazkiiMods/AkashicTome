@@ -29,7 +29,7 @@ import java.util.List;
 public class TomeItem extends Item {
 
 	public TomeItem() {
-		super(new Properties().stacksTo(1)/*TODO .tab(CreativeModeTab.TAB_TOOLS)*/);
+		super(new Properties().stacksTo(1));
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public class TomeItem extends Item {
 		if (playerIn.isShiftKeyDown()) {
 			String mod = MorphingHandler.getModFromState(worldIn.getBlockState(pos));
 			ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, mod);
-			if (!ItemStack.isSameItemSameTags(newStack, stack)) { //TODO test if sameTags as well
+			if (!ItemStack.isSameItem(newStack, stack)) { //TODO test if sameTags as well
 				playerIn.setItemInHand(hand, newStack);
 				return InteractionResult.SUCCESS;
 			}
@@ -89,7 +89,7 @@ public class TomeItem extends Item {
 
 						if (!currMod.equals(mod))
 							tooltip.add(Component.literal(MorphingHandler.getModNameForId(mod)).setStyle(Style.EMPTY.applyFormats(ChatFormatting.AQUA)));
-						tooltip.add(Component.literal(" \u2520 " + name));
+						tooltip.add(Component.literal(" ┠ " + name));
 
 						currMod = mod;
 					}
