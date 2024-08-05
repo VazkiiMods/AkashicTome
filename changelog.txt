@@ -1,2 +1,1 @@
-- Updated several lang files
-- Added a bunch of mod books to the default config
+- Fix: Removing a book from the Tome changes its title to the raw name
