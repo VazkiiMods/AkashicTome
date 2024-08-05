@@ -6,6 +6,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -49,15 +51,20 @@ public class HUDHandler {
 
 			if (!state.isAir()) {
 				ItemStack drawStack = ItemStack.EMPTY;
-				String line1 = "";
+				MutableComponent line1 = null;
 				String line2 = "";
 
 				String mod = MorphingHandler.getModFromState(state);
 				ItemStack morphStack = MorphingHandler.getShiftStackForMod(tomeStack, mod);
+
 				if (!morphStack.isEmpty() && !ItemStack.isSame(morphStack, tomeStack)) {
 					drawStack = morphStack;
-					line1 = ItemNBTHelper.getCompound(morphStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, false).getString("text");
+					line1 = Component.Serializer.fromJson(ItemNBTHelper.getCompound(morphStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, false).getString("text")).withStyle(ChatFormatting.GREEN);
 					line2 = ChatFormatting.GRAY + I18n.get("akashictome.click_morph");
+				}
+
+				if (line1 == null) {
+					line1 = Component.literal("");
 				}
 
 				if (!drawStack.isEmpty()) {
@@ -68,7 +75,7 @@ public class HUDHandler {
 
 					mc.getItemRenderer().renderGuiItem(drawStack, sx, sy);
 					mc.font.drawShadow(event.getPoseStack(), line1, sx + 20, sy + 4, 0xFFFFFFFF);
-					mc.font.drawShadow(event.getPoseStack(), line2, sx + 25, sy + 14, 0xFFFFFFFF);
+					mc.font.drawShadow(event.getPoseStack(), line2, sx + 20, sy + 14, 0xFFFFFFFF);
 				}
 			}
 		}
