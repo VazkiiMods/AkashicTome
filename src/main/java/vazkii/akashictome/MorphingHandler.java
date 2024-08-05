@@ -16,7 +16,7 @@ import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import vazkii.akashictome.network.MessageUnmorphTome;
-import vazkii.arl.util.ItemNBTHelper;
+import vazkii.akashictome.network.NetworkHandler;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -36,8 +36,8 @@ public final class MorphingHandler {
 	@SubscribeEvent
 	public void onPlayerLeftClick(PlayerInteractEvent.LeftClickEmpty event) {
 		ItemStack stack = event.getItemStack();
-		if (!stack.isEmpty() && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
-			AkashicTome.sendToServer(new MessageUnmorphTome());
+		if (!stack.isEmpty() && isAkashicTome(stack) && !stack.is(Registries.TOME.get())) {
+			NetworkHandler.sendToServer(new MessageUnmorphTome());
 		}
 	}
 
@@ -48,9 +48,9 @@ public final class MorphingHandler {
 
 		ItemEntity e = event.getEntity();
 		ItemStack stack = e.getItem();
-		if (!stack.isEmpty() && isAkashicTome(stack) && stack.getItem() != ModItems.tome) {
+		if (!stack.isEmpty() && isAkashicTome(stack) && !stack.is(Registries.TOME.get())) {
 			CompoundTag morphData = stack.getTag().getCompound(TAG_TOME_DATA).copy();
-			String currentMod = ItemNBTHelper.getString(stack, TAG_ITEM_DEFINED_MOD, getModFromStack(stack));
+			String currentMod = NBTUtils.getString(stack, TAG_ITEM_DEFINED_MOD, getModFromStack(stack));
 
 			ItemStack morph = makeMorphedStack(stack, MINECRAFT, morphData);
 			CompoundTag newMorphData = morph.getTag().getCompound(TAG_TOME_DATA);
@@ -117,7 +117,7 @@ public final class MorphingHandler {
 			return stack;
 
 		String currentMod = getModFromStack(stack);
-		String defined = ItemNBTHelper.getString(stack, TAG_ITEM_DEFINED_MOD, "");
+		String defined = NBTUtils.getString(stack, TAG_ITEM_DEFINED_MOD, "");
 		if (!defined.isEmpty())
 			currentMod = defined;
 
@@ -130,7 +130,7 @@ public final class MorphingHandler {
 
 	public static ItemStack makeMorphedStack(ItemStack currentStack, String targetMod, CompoundTag morphData) {
 		String currentMod = getModFromStack(currentStack);
-		String defined = ItemNBTHelper.getString(currentStack, TAG_ITEM_DEFINED_MOD, "");
+		String defined = NBTUtils.getString(currentStack, TAG_ITEM_DEFINED_MOD, "");
 		if (!defined.isEmpty())
 			currentMod = defined;
 
@@ -145,14 +145,14 @@ public final class MorphingHandler {
 
 		ItemStack stack;
 		if (targetMod.equals(MINECRAFT))
-			stack = new ItemStack(ModItems.tome);
+			stack = new ItemStack(Registries.TOME.get());
 		else {
 			CompoundTag targetCmp = morphData.getCompound(targetMod);
 			morphData.remove(targetMod);
 
 			stack = ItemStack.of(targetCmp);
 			if (stack.isEmpty())
-				stack = new ItemStack(ModItems.tome);
+				stack = new ItemStack(Registries.TOME.get());
 		}
 
 		if (!stack.hasTag())
@@ -162,7 +162,7 @@ public final class MorphingHandler {
 		stackCmp.put(TAG_TOME_DATA, morphData);
 		stackCmp.putBoolean(TAG_MORPHING, true);
 
-		if (stack.getItem() != ModItems.tome) {
+		if (!stack.is(Registries.TOME.get())) {
 			CompoundTag displayName = new CompoundTag();
 			CompoundTag ogDisplayName = displayName;
 			displayName.putString("text", Component.Serializer.toJson(stack.getHoverName()));
@@ -203,7 +203,7 @@ public final class MorphingHandler {
 		if (stack.isEmpty())
 			return false;
 
-		if (stack.getItem() == ModItems.tome)
+		if (stack.is(Registries.TOME.get()))
 			return true;
 
 		return stack.hasTag() && stack.getTag().getBoolean(TAG_MORPHING);

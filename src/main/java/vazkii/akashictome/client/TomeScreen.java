@@ -7,11 +7,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.model.BookModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -23,11 +21,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
+import org.joml.Matrix4f;
 import vazkii.akashictome.AkashicTome;
 import vazkii.akashictome.ConfigHandler;
 import vazkii.akashictome.MorphingHandler;
+import vazkii.akashictome.NBTUtils;
 import vazkii.akashictome.network.MessageMorphTome;
-import vazkii.arl.util.ItemNBTHelper;
+import vazkii.akashictome.network.NetworkHandler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +51,7 @@ public class TomeScreen extends Screen {
 	@Override
 	public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
 		if (p_mouseClicked_5_ == 0 && this.definedMod != null) {
-			AkashicTome.sendToServer(new MessageMorphTome(this.definedMod));
+			NetworkHandler.sendToServer(new MessageMorphTome(this.definedMod));
 			this.minecraft.setScreen(null);
 			return true;
 		}
@@ -65,9 +65,10 @@ public class TomeScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics pGuiGraphics, int mouseX, int mouseY, float partialTicks) {
+		PoseStack matrixStack = pGuiGraphics.pose();
 		this.definedMod = null;
-		super.render(matrixStack, mouseX, mouseY, partialTicks);
+		super.render(pGuiGraphics, mouseX, mouseY, partialTicks);
 
 		List<ItemStack> stacks = new ArrayList<>();
 
@@ -98,8 +99,8 @@ public class TomeScreen extends Screen {
 
 		int padding = 4;
 		int extra = 2;
-		fill(matrixStack, startX - padding, startY - padding, startX + iconSize * amountPerRow + padding, startY + iconSize * rows + padding, 0x22000000);
-		fill(matrixStack, startX - padding - extra, startY - padding - extra, startX + iconSize * amountPerRow + padding + extra, startY + iconSize * rows + padding + extra, 0x22000000);
+		pGuiGraphics.fill(startX - padding, startY - padding, startX + iconSize * amountPerRow + padding, startY + iconSize * rows + padding, 0x22000000);
+		pGuiGraphics.fill(startX - padding - extra, startY - padding - extra, startX + iconSize * amountPerRow + padding + extra, startY + iconSize * rows + padding + extra, 0x22000000);
 
 		ItemStack tooltipStack = ItemStack.EMPTY;
 
@@ -114,15 +115,16 @@ public class TomeScreen extends Screen {
 					y -= 2;
 				}
 
-				this.minecraft.getItemRenderer().renderAndDecorateItem(stack, x, y);
+				pGuiGraphics.renderItem(stack, x, y); //TODO render glint
+				//this.minecraft.getItemRenderer().renderAndDecorateItem(stack, x, y);
 			}
 		}
 
 		if (!tooltipStack.isEmpty()) {
-			CompoundTag name = ItemNBTHelper.getCompound(tooltipStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, false);
+			CompoundTag name = NBTUtils.getCompound(tooltipStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, false);
 			String tempDefinedMod = MorphingHandler.getModFromStack(tooltipStack);
 			String mod = ChatFormatting.GRAY + MorphingHandler.getModNameForId(tempDefinedMod);
-			tempDefinedMod = ItemNBTHelper.getString(tooltipStack, MorphingHandler.TAG_ITEM_DEFINED_MOD, tempDefinedMod);
+			tempDefinedMod = NBTUtils.getString(tooltipStack, MorphingHandler.TAG_ITEM_DEFINED_MOD, tempDefinedMod);
 
 			Component comp = Component.Serializer.fromJson(name.getString("text"));
 			if (comp == null)
@@ -130,67 +132,73 @@ public class TomeScreen extends Screen {
 
 			List<Component> tooltipList = Arrays.asList(comp, Component.literal(mod));
 
-			renderComponentTooltip(matrixStack, tooltipList, mouseX, mouseY, this.font);
+			pGuiGraphics.renderComponentTooltip(this.font, tooltipList, mouseX, mouseY);
 			this.definedMod = tempDefinedMod;
 		}
 
 		if(!ConfigHandler.hideBookRender.get()) {
-			// [VanillaCopy] EnchantmentScreen, but locked in open position, at different location, and bigger
-			Lighting.setupForFlatItems();
-			int guiScale = (int) this.minecraft.getWindow().getGuiScale();
-			int viewportWidth = 320;
-			int viewportHeight = 240;
-			RenderSystem.viewport((this.width - viewportWidth) / 2 * guiScale, (this.height - viewportHeight) / 2 * guiScale, viewportWidth * guiScale, viewportHeight * guiScale);
-			Matrix4f projMat = Matrix4f.createTranslateMatrix(-0.34F, 0.23F, 0.0F);
-			projMat.multiply(Matrix4f.perspective(90.0D, 1.3333334F, 9.0F, 80.0F));
-			RenderSystem.backupProjectionMatrix();
-			RenderSystem.setProjectionMatrix(projMat);
-			matrixStack.pushPose();
-			PoseStack.Pose pose = matrixStack.last();
-			pose.pose().setIdentity();
-			pose.normal().setIdentity();
-			matrixStack.translate(6.3D, 3.3F, 1984.0D); // Akashic: Position at bottom of screen
-			float scale = 15.0F; // Akashic: bigger
-			matrixStack.scale(scale, scale, scale);
-			matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
-			matrixStack.mulPose(Vector3f.XP.rotationDegrees(20.0F));
-			float f1 = 1.0F; // Akashic: lock in open position Mth.lerp(p_98763_, this.oOpen, this.open);
-			matrixStack.translate((1.0F - f1) * 0.2F, (1.0F - f1) * 0.1F, (1.0F - f1) * 0.25F);
-			float f2 = -(1.0F - f1) * 90.0F - 90.0F;
-			matrixStack.mulPose(Vector3f.YP.rotationDegrees(f2));
-			matrixStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
-			float f3 = 0.0F /* Akashic: no flip Mth.lerp(p_98763_, this.oFlip, this.flip) */ + 0.25F;
-			float f4 = 0.0F /* Akashic: no flip Mth.lerp(p_98763_, this.oFlip, this.flip) */ + 0.75F;
-			f3 = (f3 - (float) Mth.fastFloor(f3)) * 1.6F - 0.3F;
-			f4 = (f4 - (float) Mth.fastFloor(f4)) * 1.6F - 0.3F;
-			if (f3 < 0.0F) {
-				f3 = 0.0F;
-			}
 
-			if (f4 < 0.0F) {
-				f4 = 0.0F;
-			}
 
-			if (f3 > 1.0F) {
-				f3 = 1.0F;
-			}
 
-			if (f4 > 1.0F) {
-				f4 = 1.0F;
-			}
-
-			BOOK_MODEL.setupAnim(0.0F, f3, f4, f1);
-			MultiBufferSource.BufferSource buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-			VertexConsumer buffer = buffers.getBuffer(BOOK_MODEL.renderType(BOOK_TEXTURE));
-			BOOK_MODEL.renderToBuffer(matrixStack, buffer, 0xF000F0, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-			buffers.endBatch();
-			matrixStack.popPose();
-			RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
-			RenderSystem.restoreProjectionMatrix();
-			Lighting.setupFor3DItems();
 		}
 
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+	}
+
+	public void renderBook(PoseStack matrixStack) { //TODO rewrite this for 1.20
+		// [VanillaCopy] EnchantmentScreen, but locked in open position, at different location, and bigger
+		Lighting.setupForFlatItems();
+		int guiScale = (int) this.minecraft.getWindow().getGuiScale();
+		int viewportWidth = 320;
+		int viewportHeight = 240;
+		RenderSystem.viewport((this.width - viewportWidth) / 2 * guiScale, (this.height - viewportHeight) / 2 * guiScale, viewportWidth * guiScale, viewportHeight * guiScale);
+		//Matrix4f projMat = Matrix4f.createTranslateMatrix(-0.34F, 0.23F, 0.0F);
+		//projMat.multiply(Matrix4f.perspective(90.0D, 1.3333334F, 9.0F, 80.0F));
+		RenderSystem.backupProjectionMatrix();
+		//RenderSystem.setProjectionMatrix(projMat);
+		matrixStack.pushPose();
+		PoseStack.Pose pose = matrixStack.last();
+		//pose.pose().setIdentity();
+		//pose.normal().setIdentity();
+		matrixStack.translate(6.3D, 3.3F, 1984.0D); // Akashic: Position at bottom of screen
+		float scale = 15.0F; // Akashic: bigger
+		matrixStack.scale(scale, scale, scale);
+		//matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+		//matrixStack.mulPose(Vector3f.XP.rotationDegrees(20.0F));
+		float f1 = 1.0F; // Akashic: lock in open position Mth.lerp(p_98763_, this.oOpen, this.open);
+		matrixStack.translate((1.0F - f1) * 0.2F, (1.0F - f1) * 0.1F, (1.0F - f1) * 0.25F);
+		float f2 = -(1.0F - f1) * 90.0F - 90.0F;
+		//matrixStack.mulPose(Vector3f.YP.rotationDegrees(f2));
+		//matrixStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
+		float f3 = 0.0F /* Akashic: no flip Mth.lerp(p_98763_, this.oFlip, this.flip) */ + 0.25F;
+		float f4 = 0.0F /* Akashic: no flip Mth.lerp(p_98763_, this.oFlip, this.flip) */ + 0.75F;
+		//f3 = (f3 - (float) Mth.fastFloor(f3)) * 1.6F - 0.3F;
+		//f4 = (f4 - (float) Mth.fastFloor(f4)) * 1.6F - 0.3F;
+		if (f3 < 0.0F) {
+			f3 = 0.0F;
+		}
+
+		if (f4 < 0.0F) {
+			f4 = 0.0F;
+		}
+
+		if (f3 > 1.0F) {
+			f3 = 1.0F;
+		}
+
+		if (f4 > 1.0F) {
+			f4 = 1.0F;
+		}
+
+		BOOK_MODEL.setupAnim(0.0F, f3, f4, f1);
+		MultiBufferSource.BufferSource buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+		VertexConsumer buffer = buffers.getBuffer(BOOK_MODEL.renderType(BOOK_TEXTURE));
+		//BOOK_MODEL.renderToBuffer(matrixStack, buffer, 0xF000F0, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		buffers.endBatch();
+		//matrixStack.popPose();
+		RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
+		RenderSystem.restoreProjectionMatrix();
+		Lighting.setupFor3DItems();
 	}
 
 }

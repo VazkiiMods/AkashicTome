@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[40,)"
+loaderVersion="[47,)"
 issueTrackerURL="https://github.com/Vazkii/AkashicTome"
 license="Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License"
 
@@ -7,20 +7,12 @@ license="Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported Lice
 modId="akashictome"
 displayName="Akashic Tome"
 version="${file.jarVersion}"
-authors="Vazkii, MoreThanHidden"
-description='''
-The book to end all books.
-'''
-[[dependencies.akashictome]]
-    modId="autoreglib"
-    mandatory=true
-    versionRange="[1.7-52,)"
-    ordering="AFTER"
-    side="BOTH"
+authors="Vazkii, MoreThanHidden, Uraneptus"
+description='''The book to end all books.'''
 
 [[dependencies.akashictome]]
     modId="forge"
     mandatory=true
-    versionRange="[38.0.17,)"
+    versionRange="[47.1.0,)"
     ordering="AFTER"
     side="BOTH"

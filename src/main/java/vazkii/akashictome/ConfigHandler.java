@@ -30,6 +30,7 @@ public class ConfigHandler {
 
 		Predicate<Object> validator = o -> o instanceof String;
 
+		//TODO update this list
 		whitelistedItems = builder.defineList("Whitelisted Items",
 				Lists.newArrayList("roots:runedtablet",
 						"opencomputers:tool:4",

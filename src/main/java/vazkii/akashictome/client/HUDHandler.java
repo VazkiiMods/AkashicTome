@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -15,9 +16,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import org.lwjgl.opengl.GL11;
 
-import vazkii.akashictome.ModItems;
 import vazkii.akashictome.MorphingHandler;
-import vazkii.arl.util.ItemNBTHelper;
+import vazkii.akashictome.NBTUtils;
+import vazkii.akashictome.Registries;
 
 public class HUDHandler {
 
@@ -29,15 +30,16 @@ public class HUDHandler {
 		Minecraft mc = Minecraft.getInstance();
 		HitResult pos = mc.hitResult;
 		Window res = event.getWindow();
+		GuiGraphics guiGraphics = event.getGuiGraphics();
 
 		if (pos != null && pos instanceof BlockHitResult) {
 			BlockHitResult bpos = (BlockHitResult) pos;
 			ItemStack tomeStack = mc.player.getMainHandItem();
 
-			boolean hasTome = !tomeStack.isEmpty() && tomeStack.getItem() == ModItems.tome;
+			boolean hasTome = !tomeStack.isEmpty() && tomeStack.is(Registries.TOME.get());
 			if (!hasTome) {
 				tomeStack = mc.player.getOffhandItem();
-				hasTome = !tomeStack.isEmpty() && tomeStack.getItem() == ModItems.tome;
+				hasTome = !tomeStack.isEmpty() && tomeStack.is(Registries.TOME.get());
 			}
 
 			if (!hasTome)
@@ -54,9 +56,9 @@ public class HUDHandler {
 
 				String mod = MorphingHandler.getModFromState(state);
 				ItemStack morphStack = MorphingHandler.getShiftStackForMod(tomeStack, mod);
-				if (!morphStack.isEmpty() && !ItemStack.isSame(morphStack, tomeStack)) {
+				if (!morphStack.isEmpty() && !ItemStack.isSameItemSameTags(morphStack, tomeStack)) { //TODO test if same tags as well
 					drawStack = morphStack;
-					line1 = ItemNBTHelper.getCompound(morphStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, false).getString("text");
+					line1 = NBTUtils.getCompound(morphStack, MorphingHandler.TAG_TOME_DISPLAY_NAME, false).getString("text");
 					line2 = ChatFormatting.GRAY + I18n.get("akashictome.click_morph");
 				}
 
@@ -66,9 +68,9 @@ public class HUDHandler {
 					int sx = res.getGuiScaledWidth() / 2 - 17;
 					int sy = res.getGuiScaledHeight() / 2 + 2;
 
-					mc.getItemRenderer().renderGuiItem(drawStack, sx, sy);
-					mc.font.drawShadow(event.getPoseStack(), line1, sx + 20, sy + 4, 0xFFFFFFFF);
-					mc.font.drawShadow(event.getPoseStack(), line2, sx + 25, sy + 14, 0xFFFFFFFF);
+					guiGraphics.renderItem(drawStack, sx, sy);
+					guiGraphics.drawString(mc.font, line1, sx + 20, sy + 4, 0xFFFFFFFF);
+					guiGraphics.drawString(mc.font, line2, sx + 25, sy + 14, 0xFFFFFFFF);
 				}
 			}
 		}
