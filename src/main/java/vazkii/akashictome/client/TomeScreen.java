@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -99,8 +100,11 @@ public class TomeScreen extends Screen {
 
 		int padding = 4;
 		int extra = 2;
-		pGuiGraphics.fill(startX - padding, startY - padding, startX + iconSize * amountPerRow + padding, startY + iconSize * rows + padding, 0x22000000);
-		pGuiGraphics.fill(startX - padding - extra, startY - padding - extra, startX + iconSize * amountPerRow + padding + extra, startY + iconSize * rows + padding + extra, 0x22000000);
+
+		int endX = startX + iconSize * amountPerRow;
+		int endY = startY + iconSize * rows;
+		pGuiGraphics.fill(startX - padding, startY - padding, endX + padding, endY + padding, 0x22000000);
+		pGuiGraphics.fill(startX - padding - extra, startY - padding - extra, endX + padding + extra, endY + padding + extra, 0x22000000);
 
 		ItemStack tooltipStack = ItemStack.EMPTY;
 
@@ -115,8 +119,7 @@ public class TomeScreen extends Screen {
 					y -= 2;
 				}
 
-				pGuiGraphics.renderItem(stack, x, y); //TODO render glint
-				//this.minecraft.getItemRenderer().renderAndDecorateItem(stack, x, y);
+				pGuiGraphics.renderItem(stack, x, y);
 			}
 		}
 
@@ -137,68 +140,29 @@ public class TomeScreen extends Screen {
 		}
 
 		if(!ConfigHandler.hideBookRender.get()) {
-
-
+			float f = 1.0F;
+			float f1 = 0.0F;
+			Lighting.setupForEntityInInventory();
+			matrixStack.pushPose();
+			matrixStack.translate((startX + endX) / 2.0, startY - 45, 100.0F);
+			float f2 = 100.0F;
+			matrixStack.scale(-f2, f2, f2);
+			matrixStack.mulPose(Axis.XP.rotationDegrees(30.0F));
+			matrixStack.translate((1.0F - f) * 0.2F, (1.0F - f) * 0.1F, (1.0F - f) * 0.25F);
+			float f3 = -(1.0F - f) * 90.0F - 91.0F;
+			matrixStack.mulPose(Axis.YP.rotationDegrees(f3));
+			matrixStack.mulPose(Axis.XP.rotationDegrees(180.0F));
+			float f4 = Mth.clamp(Mth.frac(f1 + 0.25F) * 1.6F - 0.3F, 0.0F, 1.0F);
+			float f5 = Mth.clamp(Mth.frac(f1 + 0.75F) * 1.6F - 0.3F, 0.0F, 1.0F);
+			this.BOOK_MODEL.setupAnim(0.0F, f4, f5, f);
+			VertexConsumer vertexconsumer = pGuiGraphics.bufferSource().getBuffer(this.BOOK_MODEL.renderType(BOOK_TEXTURE));
+			this.BOOK_MODEL.renderToBuffer(matrixStack, vertexconsumer, 15728880, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+			pGuiGraphics.flush();
+			matrixStack.popPose();
+			Lighting.setupFor3DItems();
 
 		}
 
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
-
-	public void renderBook(PoseStack matrixStack) { //TODO rewrite this for 1.20
-		// [VanillaCopy] EnchantmentScreen, but locked in open position, at different location, and bigger
-		Lighting.setupForFlatItems();
-		int guiScale = (int) this.minecraft.getWindow().getGuiScale();
-		int viewportWidth = 320;
-		int viewportHeight = 240;
-		RenderSystem.viewport((this.width - viewportWidth) / 2 * guiScale, (this.height - viewportHeight) / 2 * guiScale, viewportWidth * guiScale, viewportHeight * guiScale);
-		//Matrix4f projMat = Matrix4f.createTranslateMatrix(-0.34F, 0.23F, 0.0F);
-		//projMat.multiply(Matrix4f.perspective(90.0D, 1.3333334F, 9.0F, 80.0F));
-		RenderSystem.backupProjectionMatrix();
-		//RenderSystem.setProjectionMatrix(projMat);
-		matrixStack.pushPose();
-		PoseStack.Pose pose = matrixStack.last();
-		//pose.pose().setIdentity();
-		//pose.normal().setIdentity();
-		matrixStack.translate(6.3D, 3.3F, 1984.0D); // Akashic: Position at bottom of screen
-		float scale = 15.0F; // Akashic: bigger
-		matrixStack.scale(scale, scale, scale);
-		//matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
-		//matrixStack.mulPose(Vector3f.XP.rotationDegrees(20.0F));
-		float f1 = 1.0F; // Akashic: lock in open position Mth.lerp(p_98763_, this.oOpen, this.open);
-		matrixStack.translate((1.0F - f1) * 0.2F, (1.0F - f1) * 0.1F, (1.0F - f1) * 0.25F);
-		float f2 = -(1.0F - f1) * 90.0F - 90.0F;
-		//matrixStack.mulPose(Vector3f.YP.rotationDegrees(f2));
-		//matrixStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
-		float f3 = 0.0F /* Akashic: no flip Mth.lerp(p_98763_, this.oFlip, this.flip) */ + 0.25F;
-		float f4 = 0.0F /* Akashic: no flip Mth.lerp(p_98763_, this.oFlip, this.flip) */ + 0.75F;
-		//f3 = (f3 - (float) Mth.fastFloor(f3)) * 1.6F - 0.3F;
-		//f4 = (f4 - (float) Mth.fastFloor(f4)) * 1.6F - 0.3F;
-		if (f3 < 0.0F) {
-			f3 = 0.0F;
-		}
-
-		if (f4 < 0.0F) {
-			f4 = 0.0F;
-		}
-
-		if (f3 > 1.0F) {
-			f3 = 1.0F;
-		}
-
-		if (f4 > 1.0F) {
-			f4 = 1.0F;
-		}
-
-		BOOK_MODEL.setupAnim(0.0F, f3, f4, f1);
-		MultiBufferSource.BufferSource buffers = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-		VertexConsumer buffer = buffers.getBuffer(BOOK_MODEL.renderType(BOOK_TEXTURE));
-		//BOOK_MODEL.renderToBuffer(matrixStack, buffer, 0xF000F0, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-		buffers.endBatch();
-		//matrixStack.popPose();
-		RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
-		RenderSystem.restoreProjectionMatrix();
-		Lighting.setupFor3DItems();
-	}
-
 }
