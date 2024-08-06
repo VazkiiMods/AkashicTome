@@ -26,7 +26,7 @@ public class MessageUnmorphTome {
 		if (player != null) {
 			context.enqueueWork(() -> {
 				ItemStack stack = player.getMainHandItem();
-				if (!stack.isEmpty() && MorphingHandler.isAkashicTome(stack) && stack.is(Registries.TOME.get())) {
+				if (!stack.isEmpty() && MorphingHandler.isAkashicTome(stack) && !stack.is(Registries.TOME.get())) {
 					ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, MorphingHandler.MINECRAFT);
 					var inventory = player.getInventory();
 					inventory.setItem(inventory.selected, newStack);
