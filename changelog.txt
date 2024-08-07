@@ -1,2 +1,2 @@
-- Updated several lang files
-- Added a bunch of mod books to the default config
+- Fix: Removing a book from the Tome changes its title to the raw name
+- Fix: Changing book option when looking at a mod's block is using the raw name
