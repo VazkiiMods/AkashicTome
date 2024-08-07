@@ -43,7 +43,7 @@ public class TomeItem extends Item {
 		if (playerIn.isShiftKeyDown()) {
 			String mod = MorphingHandler.getModFromState(worldIn.getBlockState(pos));
 			ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, mod);
-			if (!ItemStack.isSameItem(newStack, stack)) { //TODO test if sameTags as well
+			if (!ItemStack.isSameItem(newStack, stack)) {
 				playerIn.setItemInHand(hand, newStack);
 				return InteractionResult.SUCCESS;
 			}

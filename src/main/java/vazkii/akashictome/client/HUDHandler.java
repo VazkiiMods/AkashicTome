@@ -53,7 +53,7 @@ public class HUDHandler {
 
 			if (!state.isAir()) {
 				ItemStack drawStack = ItemStack.EMPTY;
-				MutableComponent line1 = null;
+				String line1 = "";
 				String line2 = "";
 
 				String mod = MorphingHandler.getModFromState(state);
