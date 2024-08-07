@@ -1,17 +1,17 @@
 package vazkii.akashictome.network;
 
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 
-import vazkii.akashictome.ModItems;
 import vazkii.akashictome.MorphingHandler;
-import vazkii.arl.network.IMessage;
+import vazkii.akashictome.Registries;
 
-@SuppressWarnings("serial")
-public class MessageMorphTome implements IMessage {
+import java.util.function.Supplier;
 
+public class MessageMorphTome {
 	public String modid;
 
 	public MessageMorphTome() {}
@@ -20,29 +20,37 @@ public class MessageMorphTome implements IMessage {
 		this.modid = modid;
 	}
 
-	@Override
-	public boolean receive(NetworkEvent.Context context) {
+	public static void serialize(final MessageMorphTome msg, final FriendlyByteBuf buf) {
+		buf.writeUtf(msg.modid);
+	}
+
+	public static MessageMorphTome deserialize(final FriendlyByteBuf buf) {
+		final MessageMorphTome msg = new MessageMorphTome();
+		msg.modid = buf.readUtf();
+		return msg;
+	}
+
+	public static void handle(MessageMorphTome msg, Supplier<NetworkEvent.Context> ctx) {
+		NetworkEvent.Context context = ctx.get();
 		Player player = context.getSender();
 		if (player != null) {
 			context.enqueueWork(() -> {
 				ItemStack tomeStack = player.getMainHandItem();
 				InteractionHand hand = InteractionHand.MAIN_HAND;
 
-				boolean hasTome = !tomeStack.isEmpty() && tomeStack.getItem() == ModItems.tome;
+				boolean hasTome = !tomeStack.isEmpty() && tomeStack.is(Registries.TOME.get());
 				if (!hasTome) {
 					tomeStack = player.getOffhandItem();
-					hasTome = !tomeStack.isEmpty() && tomeStack.getItem() == ModItems.tome;
+					hasTome = !tomeStack.isEmpty() && tomeStack.is(Registries.TOME.get());
 					hand = InteractionHand.OFF_HAND;
 				}
 
 				if (hasTome) {
-					ItemStack newStack = MorphingHandler.getShiftStackForMod(tomeStack, modid);
+					ItemStack newStack = MorphingHandler.getShiftStackForMod(tomeStack, msg.modid);
 					player.setItemInHand(hand, newStack);
 				}
 			});
 		}
-
-		return true;
+		context.setPacketHandled(true);
 	}
-
 }

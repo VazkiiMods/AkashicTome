@@ -1,6 +1,6 @@
 {
-	"parent": "item/handheld",
+	"parent": "minecraft:item/handheld",
 	"textures": { 
-		"layer0": "akashictome:items/tome"
+		"layer0": "akashictome:item/tome"
 	}
 }
