@@ -1,11 +1,11 @@
 plugins {
+    id 'java-library'
     id 'eclipse'
+    id 'idea'
     id 'maven-publish'
     id 'pmd'
-    id 'com.diffplug.spotless' version '5.12.5'
-    id 'net.minecraftforge.gradle' version '5.1.+'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
-    id 'org.spongepowered.mixin' version '0.7.+'
+    id 'com.diffplug.spotless' version '6.25.0'
+    id 'net.neoforged.gradle.userdev' version '7.0.165'
 }
 
 ext.configFile = file('build.properties')
@@ -13,9 +13,11 @@ ext.config = parseConfig(configFile)
 
 version = "${config.version}-${config.build_number}"
 group = "vazkii.${config.mod_id}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = config.mod_name
+base {
+    archivesName = config.mod_name
+}
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 compileJava.options.compilerArgs << "-Xlint:all,-classfile,-processing,-deprecation" << "-Werror"
 
@@ -23,64 +25,41 @@ if (System.getenv('BUILD_NUMBER') != null) {
     version += "." + System.getenv('BUILD_NUMBER')
 }
 
-minecraft {
-    // The mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   Snapshot are built nightly.
-    // stable_#            Stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not always work.
-    // Simply re-run your setup task after changing the mappings to update your workspace.
+runs {
+    // applies to all the run configs below
+    configureEach {
+        // Recommended logging data for a userdev environment
+        systemProperty 'forge.logging.markers', 'REGISTRIES'
 
-    mappings channel: "${config.mapping_channel}", version: "${config.mapping_version}"
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+        // Recommended logging level for the console
+        systemProperty 'forge.logging.console.level', 'debug'
 
-    // Default run configurations.
-    // These can be tweaked, removed, or duplicated as needed.
-    runs {
-        client {
-            workingDirectory project.file('run')
+        modSource project.sourceSets.main
+    }
 
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+    client {
+    }
 
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                akashictome {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                akashictome {
-                    source sourceSets.main
-                }
-            }
-        }
+    server {
+        programArgument '--nogui'
     }
 }
 
 repositories {
     maven {
         url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
     }
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
-    implementation fg.deobf("curse.maven:curios-309927:5367944")
-    implementation fg.deobf("curse.maven:patchouli-306770:4966125")
-    implementation fg.deobf("curse.maven:botania-225643:5594997")
+    implementation "net.neoforged:neoforge:${config.neo_version}"
+
+    implementation "curse.maven:curios-1037991:5765721"
+    implementation "curse.maven:patchouli-306770:5683901"
+//    implementation "curse.maven:botania-225643:5594997"
 }
 
 spotless {
@@ -96,11 +75,9 @@ spotless {
 }
 
 pmd {
-    toolVersion '6.22.0'
-    // no way around this warning unless we upgrade Gradle, apparently
-    //incrementalAnalysis.set(true)
-    ruleSets.clear()
-    ruleSetFiles = files("spotless/pmd-ruleset.xml")
+    toolVersion '6.35.0'
+    incrementalAnalysis.set(true)
+    ruleSetFiles = rootProject.files("spotless/pmd-ruleset.xml")
 }
 
 task checkSyntax (group: "verification") {
@@ -118,7 +95,7 @@ task incrementBuildNumber {
 
 import java.util.regex.Pattern
 task sortArtifacts(type: Copy) {
-    from jar.destinationDir
+    from jar.destinationDirectory
     into config.dir_output
     //Put each jar with a classifier in a subfolder with the classifier as its name
     eachFile {
@@ -144,9 +121,6 @@ def parseConfig(File config) {
 }
 
 jar {
-    //rename the default output, for some better... sanity with scipts
-    archiveName = "${baseName}-${version}.${extension}"
-
     manifest {
         attributes([
                 "Specification-Title": "${config.mod_id}",

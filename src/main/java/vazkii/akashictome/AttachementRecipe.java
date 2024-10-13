@@ -1,30 +1,31 @@
 package vazkii.akashictome;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class AttachementRecipe extends CustomRecipe {
 
-	public AttachementRecipe(ResourceLocation idIn, CraftingBookCategory pCategory) {
-		super(idIn, pCategory);
+	public AttachementRecipe(CraftingBookCategory pCategory) {
+		super(pCategory);
 	}
 
 	@Override
-	public boolean matches(CraftingContainer var1, Level var2) {
+	public boolean matches(CraftingInput craftingInput, Level level) {
 		boolean foundTool = false;
 		boolean foundTarget = false;
 
-		for (int i = 0; i < var1.getContainerSize(); i++) {
-			ItemStack stack = var1.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack stack = craftingInput.getItem(i);
 			if (!stack.isEmpty()) {
 				if (isTarget(stack)) {
 					if (foundTarget)
@@ -43,12 +44,12 @@ public class AttachementRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(CraftingContainer var1, RegistryAccess pRegistryAccess) {
+	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
 		ItemStack tool = ItemStack.EMPTY;
 		ItemStack target = ItemStack.EMPTY;
 
-		for (int i = 0; i < var1.getContainerSize(); i++) {
-			ItemStack stack = var1.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack stack = craftingInput.getItem(i);
 			if (!stack.isEmpty()) {
 				if (stack.is(Registries.TOME.get()))
 					tool = stack;
@@ -58,16 +59,8 @@ public class AttachementRecipe extends CustomRecipe {
 		}
 
 		ItemStack copy = tool.copy();
-		CompoundTag cmp = copy.getTag();
-		if (cmp == null) {
-			cmp = new CompoundTag();
-			copy.setTag(cmp);
-		}
 
-		if (!cmp.contains(MorphingHandler.TAG_TOME_DATA))
-			cmp.put(MorphingHandler.TAG_TOME_DATA, new CompoundTag());
-
-		CompoundTag morphData = cmp.getCompound(MorphingHandler.TAG_TOME_DATA);
+		CompoundTag morphData = copy.getOrDefault(Registries.TOME_DATA, new CompoundTag());
 
 		String mod = MorphingHandler.getModFromStack(target);
 		String modRoot = mod;
@@ -78,12 +71,12 @@ public class AttachementRecipe extends CustomRecipe {
 			tries++;
 		}
 
-		CompoundTag modCmp = new CompoundTag();
 		if (tries > 0)
-			NBTUtils.setString(target, MorphingHandler.TAG_ITEM_DEFINED_MOD, mod);
+			target.set(Registries.DEFINED_MOD, mod);
 
-		target.save(modCmp);
-		morphData.put(mod, modCmp);
+		Tag stackTag = target.save(provider, new CompoundTag());
+		morphData.put(mod, stackTag);
+		copy.set(Registries.TOME_DATA, morphData);
 
 		return copy;
 	}
@@ -111,7 +104,7 @@ public class AttachementRecipe extends CustomRecipe {
 		if (stack.getItem() instanceof IModdedBook)
 			return true;
 
-		ResourceLocation registryNameRL = ForgeRegistries.ITEMS.getKey(stack.getItem());
+		ResourceLocation registryNameRL = BuiltInRegistries.ITEM.getKey(stack.getItem());
 		String registryName = registryNameRL.toString();
 		if (ConfigHandler.whitelistedItems.get().contains(registryName) || ConfigHandler.whitelistedItems.get().contains(registryName + ":" + stack.getDamageValue()))
 			return true;
@@ -125,13 +118,13 @@ public class AttachementRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess pRegistryAccess) {
+	public ItemStack getResultItem(HolderLookup.Provider provider) {
 		return ItemStack.EMPTY;
 	}
 
 	@Override
-	public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
-		return NonNullList.withSize(inv.getContainerSize(), ItemStack.EMPTY);
+	public NonNullList<ItemStack> getRemainingItems(CraftingInput craftingInput) {
+		return NonNullList.withSize(craftingInput.size(), ItemStack.EMPTY);
 	}
 
 	@Override

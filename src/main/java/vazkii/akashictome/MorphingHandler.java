@@ -1,19 +1,20 @@
 package vazkii.akashictome;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforgespi.language.IModInfo;
 
 import vazkii.akashictome.network.MessageUnmorphTome;
 import vazkii.akashictome.network.NetworkHandler;
@@ -27,11 +28,6 @@ public final class MorphingHandler {
 	public static final MorphingHandler INSTANCE = new MorphingHandler();
 
 	public static final String MINECRAFT = "minecraft";
-
-	public static final String TAG_MORPHING = "akashictome:is_morphing";
-	public static final String TAG_TOME_DATA = "akashictome:data";
-	public static final String TAG_TOME_DISPLAY_NAME = "akashictome:displayName";
-	public static final String TAG_ITEM_DEFINED_MOD = "akashictome:definedMod";
 
 	@SubscribeEvent
 	public void onPlayerLeftClick(PlayerInteractEvent.LeftClickEmpty event) {
@@ -49,37 +45,35 @@ public final class MorphingHandler {
 		ItemEntity e = event.getEntity();
 		ItemStack stack = e.getItem();
 		if (!stack.isEmpty() && isAkashicTome(stack) && !stack.is(Registries.TOME.get())) {
-			CompoundTag morphData = stack.getTag().getCompound(TAG_TOME_DATA).copy();
-			String currentMod = NBTUtils.getString(stack, TAG_ITEM_DEFINED_MOD, getModFromStack(stack));
+			CompoundTag morphData = stack.getOrDefault(Registries.TOME_DATA, new CompoundTag()).copy();
+			String currentMod = stack.getOrDefault(Registries.DEFINED_MOD, getModFromStack(stack));
 
-			ItemStack morph = makeMorphedStack(stack, MINECRAFT, morphData);
-			CompoundTag newMorphData = morph.getTag().getCompound(TAG_TOME_DATA);
+			ItemStack morph = makeMorphedStack(stack, MINECRAFT, morphData, e.registryAccess());
+			CompoundTag newMorphData = morph.getOrDefault(Registries.TOME_DATA, new CompoundTag()).copy();
 			newMorphData.remove(currentMod);
+			morph.set(Registries.TOME_DATA, newMorphData);
 
-			if (!e.getCommandSenderWorld().isClientSide) {
-				ItemEntity newItem = new ItemEntity(e.getCommandSenderWorld(), e.getX(), e.getY(), e.getZ(), morph);
-				e.getCommandSenderWorld().addFreshEntity(newItem);
+			if (!e.level().isClientSide) {
+				ItemEntity newItem = new ItemEntity(e.level(), e.getX(), e.getY(), e.getZ(), morph);
+				e.level().addFreshEntity(newItem);
 			}
 
 			ItemStack copy = stack.copy();
-			CompoundTag copyCmp = copy.getTag();
-			if (copyCmp == null) {
-				copyCmp = new CompoundTag();
-				copy.setTag(copyCmp);
-			}
 
-			copyCmp.remove("display");
+			copy.remove(DataComponents.CUSTOM_NAME);
 
-			copyCmp.remove(TAG_MORPHING);
-			copyCmp.remove(TAG_TOME_DISPLAY_NAME);
-			copyCmp.remove(TAG_TOME_DATA);
+			copy.remove(Registries.IS_MORPHING);
+			copy.remove(Registries.DISPLAY_NAME);
+			copy.remove(Registries.DEFINED_MOD);
+			copy.remove(Registries.TOME_DATA);
+			System.out.println(copy.getComponents());
 
 			e.setItem(copy);
 		}
 	}
 
 	public static String getModFromState(BlockState state) {
-		return getModOrAlias(ForgeRegistries.BLOCKS.getKey(state.getBlock()).getNamespace());
+		return getModOrAlias(BuiltInRegistries.BLOCK.getKey(state.getBlock()).getNamespace());
 	}
 
 	public static String getModFromStack(ItemStack stack) {
@@ -99,43 +93,41 @@ public final class MorphingHandler {
 	}
 
 	public static boolean doesStackHaveModAttached(ItemStack stack, String mod) { //TODO what was this used for?
-		if (!stack.hasTag())
+		if (!stack.has(Registries.TOME_DATA))
 			return false;
 
-		CompoundTag morphData = stack.getTag().getCompound(TAG_TOME_DATA);
+		CompoundTag morphData = stack.getOrDefault(Registries.TOME_DATA, new CompoundTag());
 		return morphData.contains(mod);
 	}
 
-	public static ItemStack getShiftStackForMod(ItemStack stack, String mod) {
-		if (!stack.hasTag())
+	public static ItemStack getShiftStackForMod(ItemStack stack, String mod, RegistryAccess registryAccess) {
+		if (!stack.has(Registries.TOME_DATA))
 			return stack;
 
 		String currentMod = getModFromStack(stack);
-		String defined = NBTUtils.getString(stack, TAG_ITEM_DEFINED_MOD, "");
+		String defined = stack.getOrDefault(Registries.DEFINED_MOD, "");
 		if (!defined.isEmpty())
 			currentMod = defined;
 
 		if (mod.equals(currentMod))
 			return stack;
 
-		CompoundTag morphData = stack.getTag().getCompound(TAG_TOME_DATA);
-		return makeMorphedStack(stack, mod, morphData);
+		CompoundTag morphData = stack.getOrDefault(Registries.TOME_DATA, new CompoundTag());
+		return makeMorphedStack(stack, mod, morphData, registryAccess);
 	}
 
-	public static ItemStack makeMorphedStack(ItemStack currentStack, String targetMod, CompoundTag morphData) {
+	public static ItemStack makeMorphedStack(ItemStack currentStack, String targetMod, CompoundTag morphData, RegistryAccess registryAccess) {
 		String currentMod = getModFromStack(currentStack);
-		String defined = NBTUtils.getString(currentStack, TAG_ITEM_DEFINED_MOD, "");
+		String defined = currentStack.getOrDefault(Registries.DEFINED_MOD, "");
 		if (!defined.isEmpty())
 			currentMod = defined;
 
-		CompoundTag currentCmp = new CompoundTag();
-		currentStack.save(currentCmp);
-		currentCmp = currentCmp.copy();
-		if (currentCmp.contains("tag"))
-			currentCmp.getCompound("tag").remove(TAG_TOME_DATA);
+		ItemStack copyStack = currentStack.copy();
+		copyStack.remove(Registries.TOME_DATA);
+		copyStack.save(registryAccess, new CompoundTag());
 
 		if (!currentMod.equalsIgnoreCase(MINECRAFT) && !currentMod.equalsIgnoreCase(AkashicTome.MOD_ID))
-			morphData.put(currentMod, currentCmp);
+			morphData.put(currentMod, copyStack.save(registryAccess, new CompoundTag()).copy());
 
 		ItemStack stack;
 		if (targetMod.equals(MINECRAFT))
@@ -144,38 +136,19 @@ public final class MorphingHandler {
 			CompoundTag targetCmp = morphData.getCompound(targetMod);
 			morphData.remove(targetMod);
 
-			stack = ItemStack.of(targetCmp);
+			stack = ItemStack.parseOptional(registryAccess, targetCmp);
 			if (stack.isEmpty())
 				stack = new ItemStack(Registries.TOME.get());
 		}
 
-		if (!stack.hasTag())
-			stack.setTag(new CompoundTag());
-
-		CompoundTag stackCmp = stack.getTag();
-		stackCmp.put(TAG_TOME_DATA, morphData);
-		stackCmp.putBoolean(TAG_MORPHING, true);
+		stack.set(Registries.TOME_DATA, morphData);
+		stack.set(Registries.IS_MORPHING, true);
 
 		if (!stack.is(Registries.TOME.get())) {
-			CompoundTag displayName = new CompoundTag();
-			CompoundTag ogDisplayName = displayName;
-			displayName.putString("text", Component.Serializer.toJson(stack.getHoverName()));
-
-			if (stackCmp.contains(TAG_TOME_DISPLAY_NAME))
-				displayName = (CompoundTag) stackCmp.get(TAG_TOME_DISPLAY_NAME);
-			else
-				stackCmp.put(TAG_TOME_DISPLAY_NAME, displayName);
-
-
-			MutableComponent rawComp = Component.Serializer.fromJson(displayName.getString("text"));
-			if (rawComp == null) {
-				stackCmp.put(TAG_TOME_DISPLAY_NAME, displayName);
-				displayName = ogDisplayName;
-			}
-
-			Component stackName = rawComp.setStyle(Style.EMPTY.applyFormats(ChatFormatting.GREEN));
+			Component component = stack.getOrDefault(Registries.DISPLAY_NAME, stack.getHoverName());
+			Component stackName = component.copy().setStyle(Style.EMPTY.applyFormats(ChatFormatting.GREEN));
 			Component comp = Component.translatable("akashictome.sudo_name", stackName);
-			stack.setHoverName(comp);
+			stack.set(DataComponents.CUSTOM_NAME, comp);
 		}
 
 		stack.setCount(1);
@@ -201,7 +174,7 @@ public final class MorphingHandler {
 		if (stack.is(Registries.TOME.get()))
 			return true;
 
-		return stack.hasTag() && stack.getTag().getBoolean(TAG_MORPHING);
+		return stack.getOrDefault(Registries.IS_MORPHING, false);
 	}
 
 }

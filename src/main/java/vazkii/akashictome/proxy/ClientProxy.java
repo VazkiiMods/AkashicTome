@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 
 import vazkii.akashictome.client.HUDHandler;
 import vazkii.akashictome.client.TomeScreen;
@@ -18,7 +18,7 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void initHUD() {
-		MinecraftForge.EVENT_BUS.register(new HUDHandler());
+		NeoForge.EVENT_BUS.register(new HUDHandler());
 	}
 
 	@Override

@@ -12,9 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
@@ -22,7 +20,6 @@ import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,13 +33,13 @@ public class TomeItem extends Item {
 	public InteractionResult useOn(UseOnContext context) {
 		Player playerIn = context.getPlayer();
 		InteractionHand hand = context.getHand();
-		Level worldIn = context.getLevel();
+		Level level = context.getLevel();
 		BlockPos pos = context.getClickedPos();
 		ItemStack stack = playerIn.getItemInHand(hand);
 
 		if (playerIn.isShiftKeyDown()) {
-			String mod = MorphingHandler.getModFromState(worldIn.getBlockState(pos));
-			ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, mod);
+			String mod = MorphingHandler.getModFromState(level.getBlockState(pos));
+			ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, mod, level.registryAccess());
 			if (!ItemStack.isSameItem(newStack, stack)) {
 				playerIn.setItemInHand(hand, newStack);
 				return InteractionResult.SUCCESS;
@@ -60,11 +57,11 @@ public class TomeItem extends Item {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag advanced) {
-		if (!stack.hasTag() || !stack.getTag().contains(MorphingHandler.TAG_TOME_DATA))
+	public void appendHoverText(ItemStack stack, @Nullable TooltipContext context, List<Component> tooltip, TooltipFlag advanced) {
+		if (!stack.has(Registries.TOME_DATA))
 			return;
 
-		CompoundTag data = stack.getTag().getCompound(MorphingHandler.TAG_TOME_DATA);
+		CompoundTag data = stack.getOrDefault(Registries.TOME_DATA, new CompoundTag());
 		if (data.getAllKeys().isEmpty())
 			return;
 
@@ -76,12 +73,11 @@ public class TomeItem extends Item {
 			for (String s : keys) {
 				CompoundTag cmp = data.getCompound(s);
 				if (cmp != null) {
-					ItemStack modStack = ItemStack.of(cmp);
+					ItemStack modStack = ItemStack.parseOptional(context.registries(), cmp);
 					if (!modStack.isEmpty()) {
 						String name = modStack.getHoverName().getString();
-						if (modStack.hasTag() && modStack.getTag().contains(MorphingHandler.TAG_TOME_DISPLAY_NAME)) {
-							CompoundTag rawName = ((CompoundTag) modStack.getTag().get(MorphingHandler.TAG_TOME_DISPLAY_NAME));
-							Component nameComp = Component.Serializer.fromJson(rawName.getString("text"));
+						if (modStack.has(Registries.DISPLAY_NAME)) {
+							Component nameComp = modStack.getOrDefault(Registries.DISPLAY_NAME, Component.empty());
 							if (nameComp != null)
 								name = nameComp.getString();
 						}
