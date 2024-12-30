@@ -45,6 +45,7 @@ jobs:
         gpg --local-user "Violet Moon Signing Key" --armor \
           --detach-sign ${{ steps.calculate_artifact_names.outputs.neoforge }}
     - name: Archive NeoForge Artifacts
+
       uses: actions/upload-artifact@v4
       with:
         name: NeoForge
