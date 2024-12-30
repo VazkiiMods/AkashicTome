@@ -1,27 +1,21 @@
 package vazkii.akashictome.network;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
-import vazkii.akashictome.AkashicTome;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class NetworkHandler {
-    private static SimpleChannel channel;
-    private static int id = 0;
 
-    public static void register() {
-        final String protocolVersion = "1";
-        channel = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(AkashicTome.MOD_ID, "main"))
-                .networkProtocolVersion(() -> protocolVersion)
-                .clientAcceptedVersions(protocolVersion::equals)
-                .serverAcceptedVersions(protocolVersion::equals)
-                .simpleChannel();
-        channel.registerMessage(id++, MessageMorphTome.class, MessageMorphTome::serialize, MessageMorphTome::deserialize, MessageMorphTome::handle);
-        channel.registerMessage(id++, MessageUnmorphTome.class, MessageUnmorphTome::serialize, MessageUnmorphTome::deserialize, MessageUnmorphTome::handle);
-    }
+	public static void registerPayloadHandler(final RegisterPayloadHandlersEvent event) {
+		final PayloadRegistrar registrar = event.registrar("1");
 
-    public static <MSG> void sendToServer(MSG msg) {
-        channel.sendToServer(msg);
-    }
+		registrar.playToServer(MessageMorphTome.ID, MessageMorphTome.CODEC, MessageMorphTome::handle);
+		registrar.playToServer(MessageUnmorphTome.ID, MessageUnmorphTome.CODEC, MessageUnmorphTome::handle);
+	}
+
+	public static void sendToServer(CustomPacketPayload msg) {
+		PacketDistributor.sendToServer(msg);
+	}
 
 }

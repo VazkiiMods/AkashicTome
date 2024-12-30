@@ -1,30 +1,38 @@
 package vazkii.akashictome.network;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import vazkii.akashictome.AkashicTome;
 import vazkii.akashictome.MorphingHandler;
 import vazkii.akashictome.Registries;
 
-import java.util.function.Supplier;
+public record MessageUnmorphTome() implements CustomPacketPayload {
+	public static final StreamCodec<FriendlyByteBuf, MessageUnmorphTome> CODEC = CustomPacketPayload.codec(
+			MessageUnmorphTome::serialize,
+			MessageUnmorphTome::new);
 
-public class MessageUnmorphTome {
-	public MessageUnmorphTome() {}
+	public static final Type<MessageUnmorphTome> ID = new Type<>(ResourceLocation.fromNamespaceAndPath(AkashicTome.MOD_ID, "unmorph_tome"));
 
-	public static void serialize(final MessageUnmorphTome msg, final FriendlyByteBuf buf) {}
-
-	public static MessageUnmorphTome deserialize(final FriendlyByteBuf buf) {
-		return new MessageUnmorphTome();
+	public MessageUnmorphTome(final FriendlyByteBuf buf) {
+		this();
 	}
 
-	public static void handle(MessageUnmorphTome msg, Supplier<NetworkEvent.Context> ctx) {
-		NetworkEvent.Context context = ctx.get();
-		Player player = context.getSender();
-		if (player != null) {
-			context.enqueueWork(() -> {
+	public void serialize(final FriendlyByteBuf buf) {}
+
+	@Override
+	public Type<? extends CustomPacketPayload> type() {
+		return ID;
+	}
+
+	public static void handle(MessageUnmorphTome msg, final IPayloadContext ctx) {
+		ctx.enqueueWork(() -> {
+			if (ctx.player() instanceof ServerPlayer player) {
 				ItemStack stack = player.getMainHandItem();
 				if (!stack.isEmpty() && MorphingHandler.isAkashicTome(stack) && !stack.is(Registries.TOME.get())) {
 					ItemStack newStack = MorphingHandler.getShiftStackForMod(stack, MorphingHandler.MINECRAFT);
@@ -32,9 +40,8 @@ public class MessageUnmorphTome {
 					inventory.setItem(inventory.selected, newStack);
 					AkashicTome.proxy.updateEquippedItem();
 				}
-			});
-		}
-		context.setPacketHandled(true);
+			}
+		});
 	}
 
 }
