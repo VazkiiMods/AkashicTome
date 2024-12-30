@@ -1,24 +1,25 @@
 package vazkii.akashictome;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforgespi.language.IModInfo;
 
+import vazkii.akashictome.data_components.ToolContentComponent;
 import vazkii.akashictome.network.MessageUnmorphTome;
 import vazkii.akashictome.network.NetworkHandler;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -27,11 +28,6 @@ public final class MorphingHandler {
 	public static final MorphingHandler INSTANCE = new MorphingHandler();
 
 	public static final String MINECRAFT = "minecraft";
-
-	public static final String TAG_MORPHING = "akashictome:is_morphing";
-	public static final String TAG_TOME_DATA = "akashictome:data";
-	public static final String TAG_TOME_DISPLAY_NAME = "akashictome:displayName";
-	public static final String TAG_ITEM_DEFINED_MOD = "akashictome:definedMod";
 
 	@SubscribeEvent
 	public void onPlayerLeftClick(PlayerInteractEvent.LeftClickEmpty event) {
@@ -43,18 +39,24 @@ public final class MorphingHandler {
 
 	@SubscribeEvent
 	public void onItemDropped(ItemTossEvent event) {
-		if (!event.getPlayer().isDiscrete())
+		if (!event.getPlayer().isDiscrete()) {
 			return;
+		}
 
 		ItemEntity e = event.getEntity();
 		ItemStack stack = e.getItem();
-		if (!stack.isEmpty() && isAkashicTome(stack) && !stack.is(Registries.TOME.get())) {
-			CompoundTag morphData = stack.getTag().getCompound(TAG_TOME_DATA).copy();
-			String currentMod = NBTUtils.getString(stack, TAG_ITEM_DEFINED_MOD, getModFromStack(stack));
 
-			ItemStack morph = makeMorphedStack(stack, MINECRAFT, morphData);
-			CompoundTag newMorphData = morph.getTag().getCompound(TAG_TOME_DATA);
-			newMorphData.remove(currentMod);
+		if (!stack.isEmpty() && isAkashicTome(stack) && !stack.is(Registries.TOME.get())) {
+			ToolContentComponent contents = stack.get(Registries.TOOL_CONTENT);
+			if (contents == null) {
+				return;
+			}
+			ToolContentComponent.Mutable mutable = new ToolContentComponent.Mutable(contents);
+
+			mutable.remove(stack);
+			stack.set(Registries.TOOL_CONTENT, mutable.toImmutable());
+
+			ItemStack morph = makeMorphedStack(stack, MINECRAFT, true);
 
 			if (!e.getCommandSenderWorld().isClientSide) {
 				ItemEntity newItem = new ItemEntity(e.getCommandSenderWorld(), e.getX(), e.getY(), e.getZ(), morph);
@@ -62,28 +64,23 @@ public final class MorphingHandler {
 			}
 
 			ItemStack copy = stack.copy();
-			CompoundTag copyCmp = copy.getTag();
-			if (copyCmp == null) {
-				copyCmp = new CompoundTag();
-				copy.setTag(copyCmp);
-			}
-
-			copyCmp.remove("display");
-
-			copyCmp.remove(TAG_MORPHING);
-			copyCmp.remove(TAG_TOME_DISPLAY_NAME);
-			copyCmp.remove(TAG_TOME_DATA);
+			copy.remove(Registries.TOOL_CONTENT);
+			copy.remove(Registries.IS_MORPHED);
+			copy.remove(DataComponents.CUSTOM_NAME);
+			copy.remove(Registries.OG_DISPLAY_NAME);
+			copy.remove(Registries.DEFINED_MOD);
 
 			e.setItem(copy);
 		}
 	}
 
 	public static String getModFromState(BlockState state) {
-		return getModOrAlias(ForgeRegistries.BLOCKS.getKey(state.getBlock()).getNamespace());
+		return getModOrAlias(BuiltInRegistries.BLOCK.getKey(state.getBlock()).getNamespace());
 	}
 
 	public static String getModFromStack(ItemStack stack) {
-		return getModOrAlias(stack.isEmpty() ? MINECRAFT : stack.getItem().getCreatorModId(stack));
+		String modId = stack.getItem().getCreatorModId(stack);
+		return getModOrAlias(stack.isEmpty() ? MINECRAFT : modId != null ? modId : MINECRAFT);
 	}
 
 	public static String getModOrAlias(String mod) {
@@ -98,95 +95,116 @@ public final class MorphingHandler {
 		return aliases.getOrDefault(mod, mod);
 	}
 
-	public static boolean doesStackHaveModAttached(ItemStack stack, String mod) { //TODO what was this used for?
-		if (!stack.hasTag())
-			return false;
-
-		CompoundTag morphData = stack.getTag().getCompound(TAG_TOME_DATA);
-		return morphData.contains(mod);
-	}
-
 	public static ItemStack getShiftStackForMod(ItemStack stack, String mod) {
-		if (!stack.hasTag())
+		if (!stack.has(Registries.TOOL_CONTENT)) {
 			return stack;
-
-		String currentMod = getModFromStack(stack);
-		String defined = NBTUtils.getString(stack, TAG_ITEM_DEFINED_MOD, "");
-		if (!defined.isEmpty())
-			currentMod = defined;
-
-		if (mod.equals(currentMod))
-			return stack;
-
-		CompoundTag morphData = stack.getTag().getCompound(TAG_TOME_DATA);
-		return makeMorphedStack(stack, mod, morphData);
-	}
-
-	public static ItemStack makeMorphedStack(ItemStack currentStack, String targetMod, CompoundTag morphData) {
-		String currentMod = getModFromStack(currentStack);
-		String defined = NBTUtils.getString(currentStack, TAG_ITEM_DEFINED_MOD, "");
-		if (!defined.isEmpty())
-			currentMod = defined;
-
-		CompoundTag currentCmp = new CompoundTag();
-		currentStack.save(currentCmp);
-		currentCmp = currentCmp.copy();
-		if (currentCmp.contains("tag"))
-			currentCmp.getCompound("tag").remove(TAG_TOME_DATA);
-
-		if (!currentMod.equalsIgnoreCase(MINECRAFT) && !currentMod.equalsIgnoreCase(AkashicTome.MOD_ID))
-			morphData.put(currentMod, currentCmp);
-
-		ItemStack stack;
-		if (targetMod.equals(MINECRAFT))
-			stack = new ItemStack(Registries.TOME.get());
-		else {
-			CompoundTag targetCmp = morphData.getCompound(targetMod);
-			morphData.remove(targetMod);
-
-			stack = ItemStack.of(targetCmp);
-			if (stack.isEmpty())
-				stack = new ItemStack(Registries.TOME.get());
 		}
 
-		if (!stack.hasTag())
-			stack.setTag(new CompoundTag());
+		String currentMod = getModFromStack(stack);
 
-		CompoundTag stackCmp = stack.getTag();
-		stackCmp.put(TAG_TOME_DATA, morphData);
-		stackCmp.putBoolean(TAG_MORPHING, true);
+		String defined = "";
+		if (stack.has(Registries.DEFINED_MOD)) {
+			defined = stack.get(Registries.DEFINED_MOD);
+		}
+
+		if (!defined.isEmpty()) {
+			currentMod = defined;
+		}
+
+		if (mod.equals(currentMod)) {
+			return stack;
+		}
+
+		return makeMorphedStack(stack, mod, false);
+	}
+
+	public static ItemStack makeMorphedStack(ItemStack currentStack, String targetMod, boolean calledOnRemove) {
+		String currentMod = getModFromStack(currentStack);
+
+		String defined = "";
+		if (currentStack.has(Registries.DEFINED_MOD)) {
+			defined = currentStack.get(Registries.DEFINED_MOD);
+		}
+
+		if (!defined.isEmpty()) {
+			currentMod = defined;
+		}
+
+		ToolContentComponent currentContent = currentStack.get(Registries.TOOL_CONTENT);
+		currentStack.remove(Registries.TOOL_CONTENT);
+		ToolContentComponent newStackComponent = new ToolContentComponent(List.of(currentStack));
+		if (currentContent == null)
+			return ItemStack.EMPTY;
+
+		ToolContentComponent.Mutable mutable = getMutable(currentContent, newStackComponent, currentMod, calledOnRemove);
+
+		ItemStack stack;
+		if (targetMod.equals(MINECRAFT)) {
+			stack = new ItemStack(Registries.TOME.get());
+		} else {
+			stack = getStackFromMod(currentContent, targetMod);
+
+			if (stack.isEmpty()) {
+				stack = new ItemStack(Registries.TOME.get());
+			}
+		}
+
+		mutable.remove(stack);
+
+		stack.set(Registries.TOOL_CONTENT, mutable.toImmutable());
+		stack.set(Registries.IS_MORPHED, true);
 
 		if (!stack.is(Registries.TOME.get())) {
-			CompoundTag displayName = new CompoundTag();
-			CompoundTag ogDisplayName = displayName;
-			displayName.putString("text", Component.Serializer.toJson(stack.getHoverName()));
-
-			if (stackCmp.contains(TAG_TOME_DISPLAY_NAME))
-				displayName = (CompoundTag) stackCmp.get(TAG_TOME_DISPLAY_NAME);
-			else
-				stackCmp.put(TAG_TOME_DISPLAY_NAME, displayName);
-
-
-			MutableComponent rawComp = Component.Serializer.fromJson(displayName.getString("text"));
-			if (rawComp == null) {
-				stackCmp.put(TAG_TOME_DISPLAY_NAME, displayName);
-				displayName = ogDisplayName;
-			}
-
-			Component stackName = rawComp.setStyle(Style.EMPTY.applyFormats(ChatFormatting.GREEN));
+			Component hoverName = getOrSetOGName(stack);
+			Component stackName = Component.literal(hoverName.getString()).setStyle(Style.EMPTY.applyFormats(ChatFormatting.GREEN));
 			Component comp = Component.translatable("akashictome.sudo_name", stackName);
-			stack.setHoverName(comp);
+			stack.set(DataComponents.CUSTOM_NAME, comp);
 		}
 
 		stack.setCount(1);
 		return stack;
 	}
 
+	private static Component getOrSetOGName(ItemStack stack) {
+		Component hoverName = stack.getHoverName();
+		if (!stack.has(Registries.OG_DISPLAY_NAME)) {
+			stack.set(Registries.OG_DISPLAY_NAME, hoverName);
+		} else {
+			hoverName = stack.get(Registries.OG_DISPLAY_NAME);
+		}
+
+		return hoverName;
+	}
+
+	private static ToolContentComponent.Mutable getMutable(ToolContentComponent currentContent, ToolContentComponent newStackComponent, String currentMod, boolean calledOnRemove) {
+		ToolContentComponent.Mutable currentContentMutable = new ToolContentComponent.Mutable(currentContent);
+		if (!currentMod.equalsIgnoreCase(MINECRAFT) && !currentMod.equalsIgnoreCase(AkashicTome.MOD_ID) && !calledOnRemove) {
+			currentContentMutable.tryInsert(newStackComponent.getItems().getFirst());
+		}
+		return currentContentMutable;
+	}
+
+	public static ItemStack getStackFromMod(ToolContentComponent component, String mod) {
+		if (component != null && !component.isEmpty()) {
+			for (ItemStack contentStack : component.getItems()) {
+				if (contentStack.has(Registries.DEFINED_MOD)) {
+					if (contentStack.get(Registries.DEFINED_MOD).equals(mod)) {
+						return contentStack;
+					} else if (BuiltInRegistries.ITEM.getKey(contentStack.getItem()).getNamespace().equals(mod)) {
+						return contentStack;
+					}
+				}
+			}
+		}
+		return ItemStack.EMPTY;
+	}
+
 	private static final Map<String, String> modNames = new HashMap<>();
 
 	static {
-		for (IModInfo modEntry : ModList.get().getMods())
+		for (IModInfo modEntry : ModList.get().getMods()) {
 			modNames.put(modEntry.getModId().toLowerCase(Locale.ENGLISH), modEntry.getDisplayName());
+		}
 	}
 
 	public static String getModNameForId(String modId) {
@@ -201,7 +219,7 @@ public final class MorphingHandler {
 		if (stack.is(Registries.TOME.get()))
 			return true;
 
-		return stack.hasTag() && stack.getTag().getBoolean(TAG_MORPHING);
+		return stack.has(Registries.IS_MORPHED) && Boolean.TRUE.equals(stack.get(Registries.IS_MORPHED));
 	}
 
 }

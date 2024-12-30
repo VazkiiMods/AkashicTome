@@ -2,14 +2,14 @@ package vazkii.akashictome.proxy;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 
 import vazkii.akashictome.MorphingHandler;
 
 public class CommonProxy {
 
 	public void preInit() {
-		MinecraftForge.EVENT_BUS.register(MorphingHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(MorphingHandler.INSTANCE);
 		initHUD();
 	}
 
