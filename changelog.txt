@@ -1,1 +1,2 @@
-- Ported to 1.21.1
+- fix recipe for akashic tome
+- added config option to blacklist specific items

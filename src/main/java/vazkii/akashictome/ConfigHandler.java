@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 public class ConfigHandler {
 
 	public static ModConfigSpec.BooleanValue allItems;
-	public static ModConfigSpec.ConfigValue<List<? extends String>> whitelistedItems, whitelistedNames, blacklistedMods;
+	public static ModConfigSpec.ConfigValue<List<? extends String>> whitelistedItems, whitelistedNames, blacklistedMods, blacklistedItems;
 	public static ModConfigSpec.ConfigValue<List<? extends String>> aliasesList;
 	public static ModConfigSpec.BooleanValue hideBookRender;
 
@@ -66,6 +66,8 @@ public class ConfigHandler {
 				validator);
 
 		blacklistedMods = builder.defineList("Blacklisted Mods", Lists.newArrayList(), validator);
+
+		blacklistedItems = builder.defineList("Blacklisted Items", Lists.newArrayList(), validator);
 
 		aliasesList = builder.defineList("Mod Aliases",
 				Lists.newArrayList("nautralpledge=botania",

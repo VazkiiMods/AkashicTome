@@ -11,7 +11,10 @@ import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
+import net.neoforged.neoforge.common.ModConfigSpec;
 import vazkii.akashictome.data_components.ToolContentComponent;
+
+import java.util.List;
 
 public class AttachementRecipe extends CustomRecipe {
 
@@ -116,13 +119,20 @@ public class AttachementRecipe extends CustomRecipe {
 
 		ResourceLocation registryNameRL = BuiltInRegistries.ITEM.getKey(stack.getItem());
 		String registryName = registryNameRL.toString();
-		if (ConfigHandler.whitelistedItems.get().contains(registryName) || ConfigHandler.whitelistedItems.get().contains(registryName + ":" + stack.getDamageValue()))
+		if (ConfigHandler.whitelistedItems.get().contains(registryName) || ConfigHandler.whitelistedItems.get().contains(registryName + ":" + stack.getDamageValue())) {
 			return true;
+		}
+
+		if (ConfigHandler.blacklistedItems.get().contains(registryName) || ConfigHandler.blacklistedItems.get().contains(registryName + ":" + stack.getDamageValue())) {
+			return false;
+		}
 
 		String itemName = registryNameRL.getPath().toLowerCase();
-		for (String s : ConfigHandler.whitelistedNames.get())
-			if (itemName.contains(s.toLowerCase()))
+		for (String s : ConfigHandler.whitelistedNames.get()) {
+			if (itemName.contains(s.toLowerCase())) {
 				return true;
+			}
+		}
 
 		return false;
 	}
