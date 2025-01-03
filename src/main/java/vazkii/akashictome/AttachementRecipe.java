@@ -11,10 +11,7 @@ import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
 import vazkii.akashictome.data_components.ToolContentComponent;
-
-import java.util.List;
 
 public class AttachementRecipe extends CustomRecipe {
 
