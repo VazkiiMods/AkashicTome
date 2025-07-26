@@ -1,7 +1,7 @@
 name: Add book support
 description: Use this template if you have found a book not supported by AkashikTome.
 title: "[Feature] Add <REPLACE BY MOD NAME> book support"
-labels: ["Minor change", "Suggestion"]
+labels: ["Minor change", "Suggestion", "book compat"]
 assignees:
   - Uraneptus
 
