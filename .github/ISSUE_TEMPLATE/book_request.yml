@@ -1,0 +1,41 @@
+name: Add book support
+description: Use this template if you have found a book not supported by AkashikTome.
+title: "[Feature] Add <REPLACE BY MOD NAME> book support"
+labels: ["Minor change", "Suggestion"]
+assignees:
+  - Uraneptus
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+  - type: input
+    id: mod-url
+    attributes:
+      label: Mod Page
+      description: What is the public page of the relevant mod?
+      placeholder: "ex. https://www.curseforge.com/minecraft/mc-mods/roots-classic"
+    validations:
+      required: true
+  - type: input
+    id: mod-version
+    attributes:
+      label: Mod Version
+      description: Which version of the mod you wish the book to be added is relevant?
+      placeholder: "ex. RootsClassic-1.21.1-1.5.5"
+    validations:
+      required: true
+  - type: input
+    id: mod-book
+    attributes:
+      label: Mod Book
+      description: |
+        What is the ID of the book item in the game?
+      placeholder: "ex. rootsclassic:runic_tablet"
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        <a href="https://youtu.be/y1LfVmTvQtQ" target="_blank">How to find the ID of the item?</a>
