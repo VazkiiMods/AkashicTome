@@ -1,0 +1,13 @@
+{
+	"akashictome.sudo_name": "Akaşa Kitabı (%s)",
+	"akashictome.click_morph": "Değiştirmek için Shift-sağ tıkla",
+	"item.akashictome.tome": "Akaşa Kitabı",
+	"akashictome.misc.shift_for_info": "§7Daha fazla bilgi için §bSHIFT§7 tuşunu basılı tut",
+	"akashictome.configuration.Allow all items to be added": "Tüm eşyaların eklenmesine izin ver",
+	"akashictome.configuration.Whitelisted Items": "Beyaz Listedeki Eşyalar",
+	"akashictome.configuration.Blacklisted Mods": "Kara Listedeki Modlar",
+	"akashictome.configuration.Mod Aliases": "Mod Diğer Adları",
+	"akashictome.configuration.Hide Book Render": "Kitap Oluşturmayı Gizle",
+	"akashictome.configuration.Whitelisted Names": "Beyaz Listedeki Adlar",
+	"akashictome.configuration.Blacklisted Items": "Kara Listedeki Eşyalar"
+}
