@@ -119,6 +119,7 @@ public final class MorphingHandler {
 	}
 
 	public static ItemStack makeMorphedStack(ItemStack currentStack, String targetMod, boolean calledOnRemove) {
+		currentStack = currentStack.copy();
 		String currentMod = getModFromStack(currentStack);
 
 		String defined = "";
