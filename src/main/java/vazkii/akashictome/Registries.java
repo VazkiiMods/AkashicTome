@@ -26,6 +26,7 @@ public final class Registries {
 	public static final Supplier<DataComponentType<Boolean>> IS_MORPHED = DATA_COMPONENTS.registerComponentType("is_morphed", builder -> builder.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL));
 	public static final Supplier<DataComponentType<Component>> OG_DISPLAY_NAME = DATA_COMPONENTS.register("og_display_name", () -> DataComponentType.<Component>builder().persistent(ComponentSerialization.FLAT_CODEC).networkSynchronized(ComponentSerialization.STREAM_CODEC).build());
 	public static final Supplier<DataComponentType<String>> DEFINED_MOD = DATA_COMPONENTS.register("defined_mod", () -> DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
+	public static final Supplier<DataComponentType<Component>> CUSTOM_TOME_NAME = DATA_COMPONENTS.register("custom_tome_name", () -> DataComponentType.<Component>builder().persistent(ComponentSerialization.FLAT_CODEC).networkSynchronized(ComponentSerialization.STREAM_CODEC).build());
 
 	public static final DeferredItem<Item> TOME = ITEMS.registerItem("tome", TomeItem::new);
 

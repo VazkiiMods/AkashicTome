@@ -142,6 +142,9 @@ public final class MorphingHandler {
 		ItemStack stack;
 		if (targetMod.equals(MINECRAFT)) {
 			stack = new ItemStack(Registries.TOME.get());
+			if (currentStack.has(Registries.CUSTOM_TOME_NAME)) {
+				stack.set(DataComponents.CUSTOM_NAME, currentStack.get(Registries.CUSTOM_TOME_NAME));
+			}
 		} else {
 			stack = getStackFromMod(currentContent, targetMod);
 
@@ -158,8 +161,19 @@ public final class MorphingHandler {
 		if (!stack.is(Registries.TOME.get())) {
 			Component hoverName = getOrSetOGName(stack);
 			Component stackName = Component.literal(hoverName.getString()).setStyle(Style.EMPTY.applyFormats(ChatFormatting.GREEN));
-			Component comp = Component.translatable("akashictome.sudo_name", stackName);
-			stack.set(DataComponents.CUSTOM_NAME, comp);
+			if (!stack.has(Registries.CUSTOM_TOME_NAME)) {
+				stack.set(Registries.CUSTOM_TOME_NAME, currentStack.getHoverName());
+			}
+			Component customTomeName = stack.get(Registries.CUSTOM_TOME_NAME);
+			Component customMorphName;
+			if (customTomeName != null) {
+				customMorphName = customTomeName.copy().append(" (").append(stackName).append(")");
+			} else {
+				customMorphName = Component.translatable("akashictome.sudo_name", stackName);
+			}
+
+			stack.set(DataComponents.CUSTOM_NAME, customMorphName);
+
 		}
 
 		stack.setCount(1);
