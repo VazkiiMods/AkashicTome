@@ -62,12 +62,19 @@ public class ConfigHandler {
 						"guide",
 						"codex",
 						"dictionary",
-						"journal"),
+						"journal",
+						"tablet",
+						"grimoire",
+						"bestiary"),
 				validator);
 
 		blacklistedMods = builder.defineList("Blacklisted Mods", Lists.newArrayList(), validator);
 
-		blacklistedItems = builder.defineList("Blacklisted Items", Lists.newArrayList(), validator);
+		blacklistedItems = builder.defineList("Blacklisted Items",
+				Lists.newArrayList(
+						"primalmagick:lore_tablet_dirty",
+						"primalmagick:lore_tablet_fragment"
+				), validator);
 
 		aliasesList = builder.defineList("Mod Aliases",
 				Lists.newArrayList("nautralpledge=botania",
